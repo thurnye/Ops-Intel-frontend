@@ -1,77 +1,46 @@
-import {
-  Card,
-  CardContent,
-  Chip,
-  Container,
-  Grid,
-  Stack,
-  Typography
-} from "@mui/material";
-import { Link as RouterLink } from "react-router-dom";
+import { Box, Card, CardContent, Container, Grid, Stack, Typography } from "@mui/material";
 import { ProductionBoard } from "@features/production/components/ProductionBoard";
 import { useProduction } from "@features/production/hooks/useProduction";
 
 export function ProductionOverviewPage() {
-  const workOrders = useProduction();
-  const completionRate = 78;
-  const kpis = [
-    { label: "Revenue (MTD)", value: "$4.8M", tone: "success" as const },
-    { label: "Gross Margin", value: "31.4%", tone: "primary" as const },
-    { label: "Cash Conversion", value: "42 days", tone: "warning" as const },
-    { label: "Operating Cost", value: "$2.1M", tone: "info" as const }
+  const { workOrders, filteredJobs } = useProduction();
+  const inProgress = workOrders.filter((j) => j.status === "in_progress").length;
+  const blocked = workOrders.filter((j) => j.status === "blocked").length;
+  const completed = workOrders.filter((j) => j.status === "completed").length;
+
+  const stats = [
+    { label: "Total Jobs", value: workOrders.length, color: "#6366f1" },
+    { label: "In Progress", value: inProgress, color: "#3b82f6" },
+    { label: "Blocked", value: blocked, color: "#ef4444" },
+    { label: "Completed", value: completed, color: "#10b981" }
   ];
 
   return (
-    <Container className="space-y-6">
-      <Stack spacing={1}>
-        <Typography className="text-slate-900" variant="h4">
-          Financial Dashboard
+    <Container maxWidth={false} disableGutters className="space-y-6">
+      <Box>
+        <Typography variant="h4">Production</Typography>
+        <Typography sx={{ fontSize: 14, color: "#64748b", mt: 0.5 }}>
+          Monitor active work orders and production line status
         </Typography>
-        <Typography color="text.secondary" variant="body1">
-          Snapshot of financial performance across production, inventory, and order execution.
-        </Typography>
-      </Stack>
+      </Box>
 
-      <Grid container spacing={2}>
-        {kpis.map((kpi) => (
-          <Grid key={kpi.label} size={{ xs: 12, sm: 6, lg: 3 }}>
-            <Card className="border border-slate-200 shadow-sm">
-              <CardContent>
-                <Stack direction="row" justifyContent="space-between">
-                  <Typography color="text.secondary" variant="body2">
-                    {kpi.label}
-                  </Typography>
-                  <Chip color={kpi.tone} label={kpi.value} size="small" variant="outlined" />
-                </Stack>
+      <Grid container spacing={2.5}>
+        {stats.map((s) => (
+          <Grid key={s.label} size={{ xs: 6, md: 3 }}>
+            <Card>
+              <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
+                <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#64748b", mb: 0.5 }}>{s.label}</Typography>
+                <Typography sx={{ fontSize: "1.75rem", fontWeight: 700, color: s.color, lineHeight: 1.2 }}>{s.value}</Typography>
               </CardContent>
             </Card>
           </Grid>
         ))}
       </Grid>
 
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 12, lg: 8 }}>
-          <ProductionBoard completionRate={completionRate} totalOrders={workOrders.length} />
-        </Grid>
-        <Grid size={{ xs: 12, lg: 4 }}>
-          <Card className="h-full border border-slate-200 shadow-md">
-            <CardContent>
-              <Stack spacing={1.5}>
-                <Typography variant="overline">Quick Navigation</Typography>
-                <RouterLink className="text-brand hover:underline" to="/inventory">
-                  Inventory valuation
-                </RouterLink>
-                <RouterLink className="text-brand hover:underline" to="/production">
-                  Cost vs throughput
-                </RouterLink>
-                <Typography color="text.secondary" variant="body2">
-                  Finance reporting widgets can be added to this dashboard shell.
-                </Typography>
-              </Stack>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
+      <Box>
+        <Typography variant="h6" mb={2}>Active Jobs</Typography>
+        <ProductionBoard jobs={filteredJobs} />
+      </Box>
     </Container>
   );
 }

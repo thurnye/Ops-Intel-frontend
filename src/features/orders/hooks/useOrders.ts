@@ -2,26 +2,34 @@ import { useMemo } from "react";
 import { useAppSelector } from "@app/hooks/app.hooks";
 
 export function useOrders() {
-  const state = useAppSelector((root) => root.orders);
+  const { orders, filters, loading, page, pageSize } = useAppSelector((s) => s.orders);
 
   const filteredOrders = useMemo(() => {
-    const query = state.filters.query.toLowerCase();
+    let result = orders;
+    const q = filters.query.toLowerCase();
+    if (q) {
+      result = result.filter(
+        (o) =>
+          o.orderNumber.toLowerCase().includes(q) ||
+          (o.customerName?.toLowerCase().includes(q))
+      );
+    }
+    if (filters.status !== "all") {
+      result = result.filter((o) => o.status === filters.status);
+    }
+    if (filters.orderType !== "all") {
+      result = result.filter((o) => o.orderType === filters.orderType);
+    }
+    if (filters.paymentStatus !== "all") {
+      result = result.filter((o) => o.paymentStatus === filters.paymentStatus);
+    }
+    return result;
+  }, [orders, filters]);
 
-    return state.orders.filter((order) => {
-      const queryMatch =
-        !query ||
-        order.id.toLowerCase().includes(query) ||
-        order.customerName.toLowerCase().includes(query) ||
-        order.product.toLowerCase().includes(query);
+  return { orders: filteredOrders, allOrders: orders, filters, loading, page, pageSize };
+}
 
-      const statusMatch = state.filters.status === "all" || order.status === state.filters.status;
-
-      return queryMatch && statusMatch;
-    });
-  }, [state.filters.query, state.filters.status, state.orders]);
-
-  return {
-    ...state,
-    filteredOrders
-  };
+export function useOrderDetail(id: string | undefined) {
+  const { orderDetails } = useAppSelector((s) => s.orders);
+  return id ? orderDetails[id] : undefined;
 }

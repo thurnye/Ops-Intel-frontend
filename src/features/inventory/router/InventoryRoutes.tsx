@@ -8,7 +8,8 @@ export function InventoryRoutes() {
     <Routes>
       <Route index element={<InventoryOverviewPage />} />
       <Route path=":itemId" element={<InventoryItemDetailsPage />} />
-      <Route path="transactions" element={<InventoryTransactionsPage />} />
+      <Route path="movements" element={<InventoryTransactionsPage />} />
+      <Route path="transactions" element={<Navigate replace to="/inventory/movements" />} />
       <Route path="*" element={<Navigate replace to="." />} />
     </Routes>
   );

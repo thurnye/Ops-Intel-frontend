@@ -18,6 +18,14 @@ import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
+import PrecisionManufacturingOutlinedIcon from "@mui/icons-material/PrecisionManufacturingOutlined";
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
+import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
+import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
+import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
+import NotificationsActiveOutlinedIcon from "@mui/icons-material/NotificationsActiveOutlined";
+import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import { useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -28,11 +36,41 @@ import { useAuth } from "@features/auth/hooks/useAuth";
 const drawerWidth = 260;
 const appBarHeight = 56;
 
-const navItems = [
-  { label: "Dashboard", to: "/dashboard", icon: <DashboardOutlinedIcon fontSize="small" /> },
-  { label: "Orders", to: "/orders", icon: <ReceiptLongOutlinedIcon fontSize="small" /> },
-  { label: "Inventory", to: "/inventory", icon: <Inventory2OutlinedIcon fontSize="small" /> }
+interface NavSection {
+  group: string;
+  items: { label: string; to: string; icon: React.ReactNode }[];
+}
+
+const navSections: NavSection[] = [
+  {
+    group: "Operations",
+    items: [
+      { label: "Dashboard", to: "/dashboard", icon: <DashboardOutlinedIcon fontSize="small" /> },
+      { label: "Orders", to: "/orders", icon: <ReceiptLongOutlinedIcon fontSize="small" /> },
+      { label: "Production", to: "/production", icon: <PrecisionManufacturingOutlinedIcon fontSize="small" /> },
+      { label: "Scheduling", to: "/scheduling", icon: <CalendarMonthOutlinedIcon fontSize="small" /> },
+      { label: "Inventory", to: "/inventory", icon: <Inventory2OutlinedIcon fontSize="small" /> },
+      { label: "Shipments", to: "/shipments", icon: <LocalShippingOutlinedIcon fontSize="small" /> }
+    ]
+  },
+  {
+    group: "Insights",
+    items: [
+      { label: "Reports", to: "/reports", icon: <AssessmentOutlinedIcon fontSize="small" /> },
+      { label: "Analytics", to: "/analytics", icon: <InsightsOutlinedIcon fontSize="small" /> },
+      { label: "Alerts", to: "/alerts", icon: <NotificationsActiveOutlinedIcon fontSize="small" /> }
+    ]
+  },
+  {
+    group: "Administration",
+    items: [
+      { label: "Users", to: "/users", icon: <PeopleOutlineOutlinedIcon fontSize="small" /> },
+      { label: "Settings", to: "/settings", icon: <SettingsOutlinedIcon fontSize="small" /> }
+    ]
+  }
 ];
+
+const allNavItems = navSections.flatMap((s) => s.items);
 
 export function AppShell() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -42,7 +80,7 @@ export function AppShell() {
   const { user } = useAuth();
 
   const activeLabel = useMemo(
-    () => navItems.find((item) => location.pathname.startsWith(item.to))?.label ?? "Dashboard",
+    () => allNavItems.find((item) => location.pathname.startsWith(item.to))?.label ?? "Dashboard",
     [location.pathname]
   );
 
@@ -64,45 +102,49 @@ export function AppShell() {
       </Box>
 
       {/* Nav */}
-      <Box className="flex-1 px-3">
-        <Typography sx={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#94a3b8", px: 1.5, mb: 1 }}>
-          Operations
-        </Typography>
-        <List disablePadding>
-          {navItems.map((item) => (
-            <ListItemButton
-              component={NavLink}
-              key={item.label}
-              onClick={() => setMobileOpen(false)}
-              sx={{
-                borderRadius: "10px",
-                mb: "2px",
-                px: 1.5,
-                py: 1,
-                color: "#64748b",
-                transition: "all 0.15s ease",
-                "&:hover": {
-                  bgcolor: "#f8fafc",
-                  color: "#0f172a"
-                },
-                "&.active": {
-                  bgcolor: "#eef2ff",
-                  color: "#4f46e5",
-                  "& .MuiListItemIcon-root": { color: "#4f46e5" }
-                }
-              }}
-              to={item.to}
-            >
-              <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText
-                primary={item.label}
-                slotProps={{ primary: { sx: { fontSize: 13, fontWeight: 500 } } }}
-              />
-            </ListItemButton>
-          ))}
-        </List>
+      <Box className="flex-1 overflow-y-auto px-3">
+        {navSections.map((section) => (
+          <Box key={section.group} sx={{ mb: 2 }}>
+            <Typography sx={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#94a3b8", px: 1.5, mb: 1 }}>
+              {section.group}
+            </Typography>
+            <List disablePadding>
+              {section.items.map((item) => (
+                <ListItemButton
+                  component={NavLink}
+                  key={item.label}
+                  onClick={() => setMobileOpen(false)}
+                  sx={{
+                    borderRadius: "10px",
+                    mb: "2px",
+                    px: 1.5,
+                    py: 1,
+                    color: "#64748b",
+                    transition: "all 0.15s ease",
+                    "&:hover": {
+                      bgcolor: "#f8fafc",
+                      color: "#0f172a"
+                    },
+                    "&.active": {
+                      bgcolor: "#eef2ff",
+                      color: "#4f46e5",
+                      "& .MuiListItemIcon-root": { color: "#4f46e5" }
+                    }
+                  }}
+                  to={item.to}
+                >
+                  <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>
+                    {item.icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={item.label}
+                    slotProps={{ primary: { sx: { fontSize: 13, fontWeight: 500 } } }}
+                  />
+                </ListItemButton>
+              ))}
+            </List>
+          </Box>
+        ))}
       </Box>
 
       {/* Bottom user section */}

@@ -1,32 +1,31 @@
 import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
-import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 
-type Props = {
-  totalItems: number;
+type StatItem = {
+  label: string;
+  value: number | string;
+  color: string;
 };
 
-export function InventorySummaryCard({ totalItems }: Props) {
+type Props = {
+  stats: StatItem[];
+};
+
+export function InventorySummaryCards({ stats }: Props) {
   return (
-    <Card className="relative overflow-hidden">
-      <Box className="absolute inset-x-0 top-0 h-1" sx={{ background: "linear-gradient(135deg, #10b981, #34d399)" }} />
-      <CardContent sx={{ p: 3, "&:last-child": { pb: 3 } }}>
-        <Stack direction="row" alignItems="center" spacing={2}>
-          <Box
-            className="flex h-12 w-12 items-center justify-center rounded-xl"
-            sx={{ bgcolor: "#ecfdf5", color: "#10b981", border: "1px solid #d1fae5" }}
-          >
-            <Inventory2OutlinedIcon />
-          </Box>
-          <Box>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              Active SKUs
+    <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+      {stats.map((s) => (
+        <Card key={s.label} className="relative flex-1 overflow-hidden">
+          <Box className="absolute inset-x-0 top-0 h-1" sx={{ bgcolor: s.color }} />
+          <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
+            <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em", mb: 0.5 }}>
+              {s.label}
             </Typography>
-            <Typography sx={{ fontSize: "1.75rem", fontWeight: 700, color: "#0f172a", letterSpacing: "-0.025em", lineHeight: 1.2 }}>
-              {totalItems}
+            <Typography sx={{ fontSize: "1.5rem", fontWeight: 700, color: "#0f172a", letterSpacing: "-0.025em", lineHeight: 1.2 }}>
+              {s.value}
             </Typography>
-          </Box>
-        </Stack>
-      </CardContent>
-    </Card>
+          </CardContent>
+        </Card>
+      ))}
+    </Stack>
   );
 }
