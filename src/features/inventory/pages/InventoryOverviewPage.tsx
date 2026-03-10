@@ -4,37 +4,115 @@ import {
   Chip,
   Container,
   InputAdornment,
+  LinearProgress,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TextField,
   Typography
 } from "@mui/material";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
-import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
+import { useEffect, useMemo } from "react";
 import { Link as RouterLink } from "react-router-dom";
+import type { AppDataTableColumnDef } from "@app/components/AppDataTable";
+import { AppDataTable } from "@app/components/AppDataTable";
 import { useInventory } from "@features/inventory/hooks/useInventory";
 import { useAppDispatch } from "@app/hooks/app.hooks";
-import { setProductFilters } from "@features/inventory/redux/slices/inventory.slice";
+import { ProductStatus, type ProductListItem } from "@features/inventory/types/inventory.types";
+import { setInventoryPage, setInventoryPageSize, setProductFilters } from "@features/inventory/redux/slices/inventory.slice";
+import { fetchInventoryOverviewData, fetchInventoryReferenceData } from "@features/inventory/redux/inventory.thunks";
 import { InventorySummaryCards } from "@features/inventory/components/InventorySummaryCard";
-import { computeStockSummary } from "@features/inventory/mock/inventory.mock";
-import { productStatusLabel, productStatusColor, formatCurrency, totalOnHand, isLowStock } from "@features/inventory/utils/inventory.utils";
+import { formatCurrency, productStatusColor, productStatusLabel } from "@features/inventory/utils/inventory.utils";
 
 export function InventoryOverviewPage() {
   const dispatch = useAppDispatch();
-  const { products, allProducts, filters } = useInventory();
-  const summary = computeStockSummary(allProducts);
+  const { products, allProducts, filters, page, pageSize, pagination, loading, categories, warehouses } = useInventory();
+
+  useEffect(() => {
+    void dispatch(fetchInventoryOverviewData({ page, pageSize }));
+  }, [dispatch, page, pageSize]);
+
+  useEffect(() => {
+    if (categories.length === 0 || warehouses.length === 0) {
+      void dispatch(fetchInventoryReferenceData());
+    }
+  }, [categories.length, dispatch, warehouses.length]);
+
+  const statusCounts = useMemo(
+    () => ({
+      active: allProducts.filter((product) => product.status === ProductStatus.Active).length,
+      draft: allProducts.filter((product) => product.status === ProductStatus.Draft).length,
+      inactive: allProducts.filter((product) => product.status === ProductStatus.Inactive).length,
+      discontinued: allProducts.filter((product) => product.status === ProductStatus.Discontinued).length
+    }),
+    [allProducts]
+  );
 
   const stats = [
-    { label: "Products", value: allProducts.length, color: "#6366f1" },
-    { label: "Total On Hand", value: summary.totalOnHand.toLocaleString(), color: "#10b981" },
-    { label: "Available", value: summary.totalAvailable.toLocaleString(), color: "#3b82f6" },
-    { label: "Low Stock", value: summary.lowStockCount, color: summary.lowStockCount > 0 ? "#f59e0b" : "#94a3b8" }
+    { label: "Catalog Total", value: pagination?.total ?? allProducts.length, color: "#6366f1" },
+    { label: "Active", value: statusCounts.active, color: "#10b981" },
+    { label: "Draft", value: statusCounts.draft, color: "#3b82f6" },
+    { label: "Inactive / Discontinued", value: statusCounts.inactive + statusCounts.discontinued, color: "#f59e0b" }
   ];
+
+  const columns = useMemo<AppDataTableColumnDef<ProductListItem>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: "Product",
+        cell: ({ row }) => (
+          <RouterLink className="font-medium text-indigo-600 no-underline hover:text-indigo-800" to={`/inventory/${row.original.id}`}>
+            {row.original.name}
+          </RouterLink>
+        )
+      },
+      {
+        accessorKey: "sku",
+        header: "SKU",
+        cell: ({ row }) => (
+          <Typography sx={{ fontSize: 12.5, fontFamily: "monospace", color: "#475569" }}>
+            {row.original.sku}
+          </Typography>
+        )
+      },
+      {
+        accessorKey: "categoryName",
+        header: "Category"
+      },
+      {
+        accessorKey: "brandName",
+        header: "Brand",
+        cell: ({ row }) => row.original.brandName ?? "—"
+      },
+      {
+        accessorKey: "barcode",
+        header: "Barcode",
+        cell: ({ row }) => row.original.barcode ?? "—"
+      },
+      {
+        accessorKey: "sellingPrice",
+        header: "Price",
+        meta: { align: "right" },
+        cell: ({ row }) => formatCurrency(row.original.sellingPrice)
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        meta: { align: "center" },
+        cell: ({ row }) => (
+          <Chip
+            label={productStatusLabel(row.original.status)}
+            size="small"
+            sx={{
+              fontSize: 11,
+              fontWeight: 700,
+              bgcolor: `${productStatusColor(row.original.status)}18`,
+              color: productStatusColor(row.original.status)
+            }}
+          />
+        )
+      }
+    ],
+    []
+  );
 
   return (
     <Container maxWidth={false} disableGutters className="space-y-5">
@@ -56,13 +134,17 @@ export function InventoryOverviewPage() {
       <InventorySummaryCards stats={stats} />
 
       <Card>
+        {loading && <LinearProgress />}
         <Box className="p-4 pb-0">
           <TextField
             fullWidth
             placeholder="Search by name, SKU or barcode..."
             size="small"
             value={filters.query}
-            onChange={(e) => dispatch(setProductFilters({ query: e.target.value }))}
+            onChange={(e) => {
+              dispatch(setInventoryPage(1));
+              dispatch(setProductFilters({ query: e.target.value }));
+            }}
             slotProps={{
               input: {
                 startAdornment: (
@@ -74,59 +156,22 @@ export function InventoryOverviewPage() {
             }}
           />
         </Box>
-        <TableContainer>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Product</TableCell>
-                <TableCell>SKU</TableCell>
-                <TableCell>Category</TableCell>
-                <TableCell>Brand</TableCell>
-                <TableCell align="right">Price</TableCell>
-                <TableCell align="right">On Hand</TableCell>
-                <TableCell align="center">Status</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {products.map((p) => {
-                const low = isLowStock(p);
-                return (
-                  <TableRow key={p.id} hover>
-                    <TableCell>
-                      <RouterLink className="font-medium text-indigo-600 no-underline hover:text-indigo-800" to={`/inventory/${p.id}`}>
-                        {p.name}
-                      </RouterLink>
-                      {low && <WarningAmberOutlinedIcon sx={{ fontSize: 14, color: "#f59e0b", ml: 0.5, verticalAlign: "text-bottom" }} />}
-                    </TableCell>
-                    <TableCell>
-                      <Typography sx={{ fontSize: 13, fontFamily: "monospace", color: "#475569" }}>{p.sku}</Typography>
-                    </TableCell>
-                    <TableCell>{p.categoryName}</TableCell>
-                    <TableCell>{p.brandName ?? "—"}</TableCell>
-                    <TableCell align="right">{formatCurrency(p.sellingPrice)}</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600, color: low ? "#f59e0b" : "#0f172a" }}>
-                      {totalOnHand(p).toLocaleString()}
-                    </TableCell>
-                    <TableCell align="center">
-                      <Chip
-                        label={productStatusLabel(p.status)}
-                        size="small"
-                        sx={{ fontSize: 11, fontWeight: 600, bgcolor: `${productStatusColor(p.status)}18`, color: productStatusColor(p.status) }}
-                      />
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              {products.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} align="center" sx={{ py: 4, color: "#94a3b8" }}>
-                    No products match your search.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <Box sx={{ p: 2 }}>
+          <AppDataTable
+            columns={columns}
+            data={products}
+            emptyState="No products match your search."
+            manualPagination
+            pageIndex={page - 1}
+            pageSize={pageSize}
+            totalRows={pagination?.total ?? 0}
+            onPageChange={(pageIndex) => dispatch(setInventoryPage(pageIndex + 1))}
+            onPageSizeChange={(nextPageSize) => {
+              dispatch(setInventoryPageSize(nextPageSize));
+              dispatch(setInventoryPage(1));
+            }}
+          />
+        </Box>
       </Card>
     </Container>
   );

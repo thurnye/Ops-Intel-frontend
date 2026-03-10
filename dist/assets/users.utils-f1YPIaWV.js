@@ -1,0 +1,1 @@
+function e(r){return{admin:"Admin",leader:"Leader",planner:"Planner",operator:"Operator"}[r]}function n(r){return{admin:"error",leader:"primary",planner:"info",operator:"default"}[r]}function o(r){return r==="active"?"success":"default"}export{e as a,n as r,o as s};

@@ -2,19 +2,36 @@ import { useMemo } from "react";
 import { useAppSelector } from "@app/hooks/app.hooks";
 
 export function useShipments() {
-  const { shipments, filters } = useAppSelector((s) => s.shipments);
+  const { shipments, filters, loading, page, pageSize, pagination } = useAppSelector((s) => s.shipments);
 
-  const filteredShipments = useMemo(() => {
+  const filtered = useMemo(() => {
     let result = shipments;
-    if (filters.query) {
-      const q = filters.query.toLowerCase();
+    const q = filters.query.toLowerCase();
+    if (q) {
       result = result.filter(
-        (s) => s.id.toLowerCase().includes(q) || s.customerName.toLowerCase().includes(q) || s.orderId.toLowerCase().includes(q)
+        (s) =>
+          s.shipmentNumber.toLowerCase().includes(q) ||
+          (s.orderNumber?.toLowerCase().includes(q)) ||
+          (s.carrierName?.toLowerCase().includes(q)) ||
+          (s.trackingNumber?.toLowerCase().includes(q))
       );
     }
-    if (filters.status) result = result.filter((s) => s.status === filters.status);
+    if (filters.status !== "all") {
+      result = result.filter((s) => s.status === filters.status);
+    }
+    if (filters.type !== "all") {
+      result = result.filter((s) => s.type === filters.type);
+    }
+    if (filters.priority !== "all") {
+      result = result.filter((s) => s.priority === filters.priority);
+    }
     return result;
   }, [shipments, filters]);
 
-  return { shipments, filteredShipments, filters };
+  return { shipments: filtered, allShipments: shipments, filters, loading, page, pageSize, pagination };
+}
+
+export function useShipmentDetail(id: string | undefined) {
+  const { shipmentDetails } = useAppSelector((s) => s.shipments);
+  return id ? shipmentDetails[id] : undefined;
 }

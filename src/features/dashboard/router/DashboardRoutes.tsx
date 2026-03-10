@@ -1,11 +1,16 @@
+import { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { DashboardOverviewPage } from "@features/dashboard/pages/DashboardOverviewPage";
+import { RouteLoading } from "@app/routes/RouteLoading";
+
+const DashboardOverviewPage = lazy(() => import("@features/dashboard/pages/DashboardOverviewPage").then((module) => ({ default: module.DashboardOverviewPage })));
 
 export function DashboardRoutes() {
   return (
-    <Routes>
-      <Route index element={<DashboardOverviewPage />} />
-      <Route path="*" element={<Navigate replace to="." />} />
-    </Routes>
+    <Suspense fallback={<RouteLoading label="Loading dashboard..." />}>
+      <Routes>
+        <Route index element={<DashboardOverviewPage />} />
+        <Route path="*" element={<Navigate replace to="." />} />
+      </Routes>
+    </Suspense>
   );
 }

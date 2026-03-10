@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useAppSelector } from "@app/hooks/app.hooks";
 
 export function useOrders() {
-  const { orders, filters, loading, page, pageSize } = useAppSelector((s) => s.orders);
+  const { orders, filters, loading, page, pageSize, pagination } = useAppSelector((s) => s.orders);
 
   const filteredOrders = useMemo(() => {
     let result = orders;
@@ -26,7 +26,7 @@ export function useOrders() {
     return result;
   }, [orders, filters]);
 
-  return { orders: filteredOrders, allOrders: orders, filters, loading, page, pageSize };
+  return { orders: filteredOrders, allOrders: orders, filters, loading, page, pageSize, pagination };
 }
 
 export function useOrderDetail(id: string | undefined) {

@@ -15,8 +15,11 @@ import {
   Typography
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useEffect } from "react";
 import { Link as RouterLink, useParams } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "@app/hooks/app.hooks";
 import { useOrderDetail } from "@features/orders/hooks/useOrders";
+import { fetchOrderById } from "@features/orders/redux/orders.thunks";
 import {
   orderStatusLabel,
   orderStatusColor,
@@ -34,7 +37,23 @@ import { AddressType } from "@features/orders/types/orders.types";
 
 export function OrderDetailsPage() {
   const { orderId } = useParams();
+  const dispatch = useAppDispatch();
   const order = useOrderDetail(orderId);
+  const { detailLoading } = useAppSelector((state) => state.orders);
+
+  useEffect(() => {
+    if (orderId && !order) {
+      void dispatch(fetchOrderById(orderId));
+    }
+  }, [dispatch, order, orderId]);
+
+  if (detailLoading && !order) {
+    return (
+      <Container maxWidth={false} disableGutters>
+        <Typography sx={{ color: "#64748b" }}>Loading order...</Typography>
+      </Container>
+    );
+  }
 
   if (!order) {
     return (

@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { orderListMock, orderDetailsMock } from "@features/orders/mock/orders.mock";
 import type { OrderListItem, OrderDetail, OrdersFilters } from "@features/orders/types/orders.types";
+import type { PaginationMeta } from "@shared/types/api.types";
+import { fetchOrderById, fetchOrders } from "@features/orders/redux/orders.thunks";
 
 type OrdersState = {
   orders: OrderListItem[];
@@ -9,29 +10,29 @@ type OrdersState = {
   filters: OrdersFilters;
   page: number;
   pageSize: number;
+  pagination: PaginationMeta | null;
   loading: boolean;
+  detailLoading: boolean;
+  error: string | null;
 };
 
 const initialState: OrdersState = {
-  orders: orderListMock,
-  orderDetails: orderDetailsMock,
+  orders: [],
+  orderDetails: {},
   selectedOrderId: null,
   filters: { query: "", status: "all", orderType: "all", paymentStatus: "all" },
   page: 1,
   pageSize: 25,
-  loading: false
+  pagination: null,
+  loading: false,
+  detailLoading: false,
+  error: null
 };
 
 const ordersSlice = createSlice({
   name: "orders",
   initialState,
   reducers: {
-    setOrders(state, action: PayloadAction<OrderListItem[]>) {
-      state.orders = action.payload;
-    },
-    setOrderDetail(state, action: PayloadAction<OrderDetail>) {
-      state.orderDetails[action.payload.id] = action.payload;
-    },
     setSelectedOrder(state, action: PayloadAction<string | null>) {
       state.selectedOrderId = action.payload;
     },
@@ -41,11 +42,39 @@ const ordersSlice = createSlice({
     setOrdersPage(state, action: PayloadAction<number>) {
       state.page = action.payload;
     },
-    setLoading(state, action: PayloadAction<boolean>) {
-      state.loading = action.payload;
+    setOrdersPageSize(state, action: PayloadAction<number>) {
+      state.pageSize = action.payload;
     }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchOrders.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchOrders.fulfilled, (state, action) => {
+        state.loading = false;
+        state.orders = action.payload.orders;
+        state.pagination = action.payload.pagination;
+      })
+      .addCase(fetchOrders.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload ?? "Failed to load orders.";
+      })
+      .addCase(fetchOrderById.pending, (state) => {
+        state.detailLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchOrderById.fulfilled, (state, action) => {
+        state.detailLoading = false;
+        state.orderDetails[action.payload.id] = action.payload;
+      })
+      .addCase(fetchOrderById.rejected, (state, action) => {
+        state.detailLoading = false;
+        state.error = action.payload ?? "Failed to load order details.";
+      });
   }
 });
 
-export const { setOrders, setOrderDetail, setSelectedOrder, setOrdersFilters, setOrdersPage, setLoading } = ordersSlice.actions;
+export const { setSelectedOrder, setOrdersFilters, setOrdersPage, setOrdersPageSize } = ordersSlice.actions;
 export default ordersSlice.reducer;

@@ -1,10 +1,9 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { CircularProgress, Stack } from "@mui/material";
 import { useAuth } from "@features/auth/hooks/useAuth";
-import type { Permission } from "@features/auth/types/auth.types";
 
 type Props = {
-  permission?: Permission;
+  permission?: string;
 };
 
 export function ProtectedRoute({ permission }: Props) {

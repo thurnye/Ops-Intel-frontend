@@ -1,6 +1,4 @@
-import type { AuthSession } from "@features/auth/types/auth.types";
-
-export const mockSession: AuthSession = {
+export const mockSession = {
   user: {
     id: "u-001",
     name: "Operations Supervisor",

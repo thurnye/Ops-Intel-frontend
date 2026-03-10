@@ -1,0 +1,1 @@
+function n(o){return{critical:"error",high:"error",medium:"warning",low:"info"}[o]}function a(o){return o.charAt(0).toUpperCase()+o.slice(1)}function i(o){const e=Date.now()-new Date(o).getTime(),r=Math.floor(e/6e4);if(r<60)return`${r}m ago`;const t=Math.floor(r/60);return t<24?`${t}h ago`:`${Math.floor(t/24)}d ago`}export{a,n as s,i as t};

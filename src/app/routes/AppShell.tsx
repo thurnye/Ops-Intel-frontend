@@ -27,10 +27,8 @@ import NotificationsActiveOutlinedIcon from "@mui/icons-material/NotificationsAc
 import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
-import { useMemo, useState } from "react";
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { useAppDispatch } from "@app/hooks/app.hooks";
-import { clearSession } from "@features/auth/redux/slices/auth.slice";
+import { useState } from "react";
+import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "@features/auth/hooks/useAuth";
 
 const drawerWidth = 260;
@@ -70,24 +68,12 @@ const navSections: NavSection[] = [
   }
 ];
 
-const allNavItems = navSections.flatMap((s) => s.items);
-
 export function AppShell() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const location = useLocation();
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-  const { user } = useAuth();
-
-  const activeLabel = useMemo(
-    () => allNavItems.find((item) => location.pathname.startsWith(item.to))?.label ?? "Dashboard",
-    [location.pathname]
-  );
+  const { user, logout } = useAuth();
 
   const signOut = () => {
-    localStorage.removeItem("auth_token");
-    dispatch(clearSession());
-    navigate("/login", { replace: true });
+    logout();
   };
 
   const navContent = (
@@ -159,11 +145,11 @@ export function AppShell() {
             color: "#fff"
           }}
         >
-          {user?.name?.slice(0, 1) ?? "U"}
+          {user?.profile?.firstName?.slice(0, 1) ?? "U"}
         </Avatar>
         <Box className="flex-1 overflow-hidden">
           <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#0f172a", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            {user?.name ?? "User"}
+            {user?.profile ? `${user.profile.firstName} ${user.profile.lastName}` : "User"}
           </Typography>
           <Typography sx={{ fontSize: 11, color: "#94a3b8" }}>Operator</Typography>
         </Box>
@@ -202,7 +188,7 @@ export function AppShell() {
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-white"
                 sx={{ background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)" }}
               >
-                <Typography sx={{ fontSize: 13, fontWeight: 800 }}>F</Typography>
+                <Typography sx={{ fontSize: 13, fontWeight: 800 }}>O</Typography>
               </Box>
               <Box className="hidden md:block">
                 <Typography sx={{ fontSize: 14, fontWeight: 700, color: "#0f172a", letterSpacing: "-0.01em", lineHeight: 1.2 }}>
@@ -250,7 +236,7 @@ export function AppShell() {
                 ml: 0.5
               }}
             >
-              {user?.name?.slice(0, 1) ?? "U"}
+              {user?.profile?.firstName?.slice(0, 1) ?? "U"}
             </Avatar>
           </Box>
         </Toolbar>

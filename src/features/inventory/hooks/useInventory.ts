@@ -3,7 +3,7 @@ import { useAppSelector } from "@app/hooks/app.hooks";
 import { ProductStatus } from "@features/inventory/types/inventory.types";
 
 export function useInventory() {
-  const { products, productFilters, loading } = useAppSelector((s) => s.inventory);
+  const { products, productFilters, loading, page, pageSize, pagination, categories, warehouses } = useAppSelector((s) => s.inventory);
 
   const filtered = useMemo(() => {
     let result = products;
@@ -24,12 +24,12 @@ export function useInventory() {
 
   const activeCount = products.filter((p) => p.status === ProductStatus.Active).length;
 
-  return { products: filtered, allProducts: products, activeCount, loading, filters: productFilters };
+  return { products: filtered, allProducts: products, activeCount, loading, filters: productFilters, page, pageSize, pagination, categories, warehouses };
 }
 
 export function useProductById(id: string | undefined) {
-  const { products } = useAppSelector((s) => s.inventory);
-  return products.find((p) => p.id === id);
+  const { productDetails } = useAppSelector((s) => s.inventory);
+  return id ? productDetails[id] : undefined;
 }
 
 export function useStockMovements() {

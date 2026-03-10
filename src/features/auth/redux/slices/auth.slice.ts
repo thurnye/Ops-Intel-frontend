@@ -1,10 +1,10 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { AuthSession, Permission, User } from "@features/auth/types/auth.types";
+import type { User } from "@features/auth/types/auth.types";
 
 type AuthState = {
   user: User | null;
-  token: string | null;
-  permissions: Permission[];
+  accessToken: string | null;
+  accessTokenExpiresAtUtc: string | null;
   isAuthenticated: boolean;
   isBootstrapped: boolean;
   loading: boolean;
@@ -13,8 +13,8 @@ type AuthState = {
 
 const initialState: AuthState = {
   user: null,
-  token: null,
-  permissions: [],
+  accessToken: null,
+  accessTokenExpiresAtUtc: null,
   isAuthenticated: false,
   isBootstrapped: false,
   loading: false,
@@ -29,23 +29,26 @@ const authSlice = createSlice({
       state.loading = true;
       state.error = null;
     },
-    setSession(state, action: PayloadAction<AuthSession>) {
+    setAuth(state, action: PayloadAction<{ user: User; accessToken: string; accessTokenExpiresAtUtc: string }>) {
       state.user = action.payload.user;
-      state.token = action.payload.token;
-      state.permissions = action.payload.permissions;
+      state.accessToken = action.payload.accessToken;
+      state.accessTokenExpiresAtUtc = action.payload.accessTokenExpiresAtUtc;
       state.isAuthenticated = true;
       state.isBootstrapped = true;
       state.loading = false;
       state.error = null;
     },
+    setUser(state, action: PayloadAction<User>) {
+      state.user = action.payload;
+    },
     setAuthError(state, action: PayloadAction<string>) {
       state.loading = false;
       state.error = action.payload;
     },
-    clearSession(state) {
+    clearAuth(state) {
       state.user = null;
-      state.token = null;
-      state.permissions = [];
+      state.accessToken = null;
+      state.accessTokenExpiresAtUtc = null;
       state.isAuthenticated = false;
       state.loading = false;
       state.error = null;
@@ -57,5 +60,5 @@ const authSlice = createSlice({
   }
 });
 
-export const { startAuth, setSession, setAuthError, clearSession, bootstrapComplete } = authSlice.actions;
+export const { startAuth, setAuth, setUser, setAuthError, clearAuth, bootstrapComplete } = authSlice.actions;
 export default authSlice.reducer;

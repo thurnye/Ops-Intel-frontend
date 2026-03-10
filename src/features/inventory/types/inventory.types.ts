@@ -82,6 +82,7 @@ export type ProductListItem = {
   name: string;
   sku: string;
   barcode?: string;
+  categoryId?: string;
   categoryName: string;
   brandName?: string;
   sellingPrice: number;

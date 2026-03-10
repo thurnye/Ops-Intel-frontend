@@ -15,13 +15,32 @@ import {
   Typography
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useEffect } from "react";
 import { Link as RouterLink, useParams } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "@app/hooks/app.hooks";
 import { useProductById } from "@features/inventory/hooks/useInventory";
+import { fetchInventoryProductById } from "@features/inventory/redux/inventory.thunks";
 import { productStatusLabel, productStatusColor, formatCurrency, totalOnHand, totalAvailable } from "@features/inventory/utils/inventory.utils";
 
 export function InventoryItemDetailsPage() {
   const { itemId } = useParams();
+  const dispatch = useAppDispatch();
   const product = useProductById(itemId);
+  const { detailLoading } = useAppSelector((state) => state.inventory);
+
+  useEffect(() => {
+    if (itemId && !product) {
+      void dispatch(fetchInventoryProductById(itemId));
+    }
+  }, [dispatch, itemId, product]);
+
+  if (detailLoading && !product) {
+    return (
+      <Container maxWidth={false} disableGutters>
+        <Typography sx={{ color: "#64748b" }}>Loading product...</Typography>
+      </Container>
+    );
+  }
 
   if (!product) {
     return (

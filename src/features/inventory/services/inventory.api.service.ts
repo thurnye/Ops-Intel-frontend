@@ -1,5 +1,5 @@
 import { apiClient } from "@shared/services/apiClient.service";
-import type { PagedResponse } from "@shared/types/api.types";
+import type { ApiResponse } from "@shared/types/api.types";
 import type {
   Product,
   ProductListItem,
@@ -14,51 +14,56 @@ import type {
 
 export const inventoryApi = {
   /* ── Products ─────────────────────────────────── */
-  async listProducts(params?: { pageNumber?: number; pageSize?: number; search?: string; status?: number; categoryId?: string }): Promise<PagedResponse<ProductListItem>> {
-    const { data } = await apiClient.get<PagedResponse<ProductListItem>>("/inventory/products", { params });
+  async listProducts(params?: { pageNumber?: number; pageSize?: number; searchTerm?: string; status?: number; categoryId?: string }): Promise<ApiResponse<ProductListItem[]>> {
+    const { data } = await apiClient.get<ApiResponse<ProductListItem[]>>("/inventory/products", { params });
     return data;
   },
 
-  async getProduct(id: string): Promise<Product> {
-    const { data } = await apiClient.get<Product>(`/inventory/products/${id}`);
+  async getProduct(id: string): Promise<ApiResponse<Product>> {
+    const { data } = await apiClient.get<ApiResponse<Product>>(`/inventory/products/${id}`);
     return data;
   },
 
   /* ── Stock ────────────────────────────────────── */
-  async getProductStock(productId: string): Promise<InventoryStock[]> {
-    const { data } = await apiClient.get<InventoryStock[]>(`/inventory/products/${productId}/stock`);
+  async getProductStock(productId: string): Promise<ApiResponse<InventoryStock[]>> {
+    const { data } = await apiClient.get<ApiResponse<InventoryStock[]>>(`/inventory/stocks/product/${productId}`);
     return data;
   },
 
   /* ── Movements ────────────────────────────────── */
-  async listMovements(params?: { pageNumber?: number; pageSize?: number; productId?: string; warehouseId?: string; movementType?: number }): Promise<PagedResponse<StockMovement>> {
-    const { data } = await apiClient.get<PagedResponse<StockMovement>>("/inventory/stock-movements", { params });
+  async getMovementsByProduct(productId: string): Promise<ApiResponse<StockMovement[]>> {
+    const { data } = await apiClient.get<ApiResponse<StockMovement[]>>(`/inventory/stock-movements/product/${productId}`);
+    return data;
+  },
+
+  async getMovementsByWarehouse(warehouseId: string): Promise<ApiResponse<StockMovement[]>> {
+    const { data } = await apiClient.get<ApiResponse<StockMovement[]>>(`/inventory/stock-movements/warehouse/${warehouseId}`);
     return data;
   },
 
   /* ── Reference data ───────────────────────────── */
-  async listCategories(): Promise<Category[]> {
-    const { data } = await apiClient.get<Category[]>("/inventory/categories");
+  async listCategories(): Promise<ApiResponse<Category[]>> {
+    const { data } = await apiClient.get<ApiResponse<Category[]>>("/inventory/categories");
     return data;
   },
 
-  async listBrands(): Promise<Brand[]> {
-    const { data } = await apiClient.get<Brand[]>("/inventory/brands");
+  async listBrands(): Promise<ApiResponse<Brand[]>> {
+    const { data } = await apiClient.get<ApiResponse<Brand[]>>("/inventory/brands");
     return data;
   },
 
-  async listUnits(): Promise<UnitOfMeasure[]> {
-    const { data } = await apiClient.get<UnitOfMeasure[]>("/inventory/units-of-measure");
+  async listUnits(): Promise<ApiResponse<UnitOfMeasure[]>> {
+    const { data } = await apiClient.get<ApiResponse<UnitOfMeasure[]>>("/inventory/unit-of-measures");
     return data;
   },
 
-  async listWarehouses(): Promise<Warehouse[]> {
-    const { data } = await apiClient.get<Warehouse[]>("/inventory/warehouses");
+  async listWarehouses(): Promise<ApiResponse<Warehouse[]>> {
+    const { data } = await apiClient.get<ApiResponse<Warehouse[]>>("/inventory/warehouses");
     return data;
   },
 
-  async listSuppliers(): Promise<Supplier[]> {
-    const { data } = await apiClient.get<Supplier[]>("/inventory/suppliers");
+  async listSuppliers(): Promise<ApiResponse<Supplier[]>> {
+    const { data } = await apiClient.get<ApiResponse<Supplier[]>>("/inventory/suppliers");
     return data;
   }
 };
