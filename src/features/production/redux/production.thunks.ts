@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { productionApi } from "@features/production/services/production.api.service";
-import type { ProductionOrder, ProductionOrderSummary } from "@features/production/types/production.types";
+import type { ProductionFilters, ProductionOrder, ProductionOrderSummary } from "@features/production/types/production.types";
 import type { PaginationMeta } from "@shared/types/api.types";
 import { getApiData, getErrorMessage, getPagedItems, getPaginationMeta } from "@shared/utils/asyncThunk.utils";
 
@@ -9,11 +9,19 @@ type ProductionOrdersPayload = {
   pagination: PaginationMeta | null;
 };
 
-export const fetchProductionOrders = createAsyncThunk<ProductionOrdersPayload, { page: number; pageSize: number }, { rejectValue: string }>(
+export const fetchProductionOrders = createAsyncThunk<ProductionOrdersPayload, { page: number; pageSize: number; filters: ProductionFilters }, { rejectValue: string }>(
   "production/fetchOrders",
-  async ({ page, pageSize }, { rejectWithValue }) => {
+  async ({ page, pageSize, filters }, { rejectWithValue }) => {
     try {
-      const response = await productionApi.listOrders({ pageNumber: page, pageSize });
+      const response = await productionApi.listOrders({
+        pageNumber: page,
+        pageSize,
+        searchTerm: filters.query || undefined,
+        status: filters.status === "all" ? undefined : filters.status,
+        priority: filters.priority === "all" ? undefined : filters.priority,
+        plannedStartDateFrom: filters.plannedStartFrom || undefined,
+        plannedStartDateTo: filters.plannedStartTo || undefined
+      });
       return {
         orders: getPagedItems(response),
         pagination: getPaginationMeta(response)

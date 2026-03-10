@@ -1,10 +1,11 @@
 import {
-  Box, Card, CardContent, Chip, Container, Grid, LinearProgress, Stack,
+  Box, Button, Card, CardContent, Chip, Container, Grid, LinearProgress, Stack,
   TextField, InputAdornment, Typography, MenuItem, Select, type SelectChangeEvent
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import AddIcon from "@mui/icons-material/Add";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import type { AppDataTableColumnDef } from "@app/components/AppDataTable";
 import { AppDataTable } from "@app/components/AppDataTable";
 import { useProduction } from "@features/production/hooks/useProduction";
@@ -23,8 +24,8 @@ export function ProductionOverviewPage() {
   const { orders, allOrders, filters, page, pageSize, pagination } = useProduction();
 
   useEffect(() => {
-    void dispatch(fetchProductionOrders({ page, pageSize }));
-  }, [dispatch, page, pageSize]);
+    void dispatch(fetchProductionOrders({ page, pageSize, filters }));
+  }, [dispatch, filters, page, pageSize]);
 
   const inProgress = allOrders.filter((o) => o.status === ProductionOrderStatus.InProgress).length;
   const paused = allOrders.filter((o) => o.status === ProductionOrderStatus.Paused).length;
@@ -117,12 +118,17 @@ export function ProductionOverviewPage() {
 
   return (
     <Container maxWidth={false} disableGutters className="space-y-6">
-      <Box>
-        <Typography variant="h4">Production</Typography>
-        <Typography sx={{ fontSize: 14, color: "#64748b", mt: 0.5 }}>
-          Monitor production orders, executions, and work center activity
-        </Typography>
-      </Box>
+      <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" alignItems={{ md: "center" }} spacing={2}>
+        <Box>
+          <Typography variant="h4">Production</Typography>
+          <Typography sx={{ fontSize: 14, color: "#64748b", mt: 0.5 }}>
+            Monitor production orders, executions, and work center activity
+          </Typography>
+        </Box>
+        <Button component={RouterLink} to="/production/new" variant="contained" startIcon={<AddIcon />}>
+          Create Production Order
+        </Button>
+      </Stack>
 
       <Grid container spacing={2.5}>
         {stats.map((s) => (
@@ -143,7 +149,10 @@ export function ProductionOverviewPage() {
           size="small"
           placeholder="Search orders..."
           value={filters.query}
-          onChange={(e) => dispatch(setProductionFilters({ query: e.target.value }))}
+          onChange={(e) => {
+            dispatch(setProductionPage(1));
+            dispatch(setProductionFilters({ query: e.target.value }));
+          }}
           slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon sx={{ fontSize: 18, color: "#94a3b8" }} /></InputAdornment> } }}
           sx={{ minWidth: 260 }}
         />
@@ -151,7 +160,10 @@ export function ProductionOverviewPage() {
           native={false}
           size="small"
           value={String(filters.status)}
-          onChange={(e: SelectChangeEvent<string>) => dispatch(setProductionFilters({ status: e.target.value === "all" ? "all" : Number(e.target.value) as ProductionOrderStatus }))}
+          onChange={(e: SelectChangeEvent<string>) => {
+            dispatch(setProductionPage(1));
+            dispatch(setProductionFilters({ status: e.target.value === "all" ? "all" : Number(e.target.value) as ProductionOrderStatus }));
+          }}
           sx={{ minWidth: 150 }}
         >
           <MenuItem value="all">All Statuses</MenuItem>
@@ -168,7 +180,10 @@ export function ProductionOverviewPage() {
           native={false}
           size="small"
           value={String(filters.priority)}
-          onChange={(e: SelectChangeEvent<string>) => dispatch(setProductionFilters({ priority: e.target.value === "all" ? "all" : Number(e.target.value) as ProductionPriority }))}
+          onChange={(e: SelectChangeEvent<string>) => {
+            dispatch(setProductionPage(1));
+            dispatch(setProductionFilters({ priority: e.target.value === "all" ? "all" : Number(e.target.value) as ProductionPriority }));
+          }}
           sx={{ minWidth: 140 }}
         >
           <MenuItem value="all">All Priorities</MenuItem>
@@ -177,6 +192,28 @@ export function ProductionOverviewPage() {
           <MenuItem value={ProductionPriority.High}>High</MenuItem>
           <MenuItem value={ProductionPriority.Urgent}>Urgent</MenuItem>
         </Select>
+        <TextField
+          size="small"
+          type="date"
+          label="Start From"
+          value={filters.plannedStartFrom}
+          onChange={(e) => {
+            dispatch(setProductionPage(1));
+            dispatch(setProductionFilters({ plannedStartFrom: e.target.value }));
+          }}
+          slotProps={{ inputLabel: { shrink: true } }}
+        />
+        <TextField
+          size="small"
+          type="date"
+          label="Start To"
+          value={filters.plannedStartTo}
+          onChange={(e) => {
+            dispatch(setProductionPage(1));
+            dispatch(setProductionFilters({ plannedStartTo: e.target.value }));
+          }}
+          slotProps={{ inputLabel: { shrink: true } }}
+        />
       </Stack>
 
       {/* Orders Table */}

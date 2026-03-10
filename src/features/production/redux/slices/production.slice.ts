@@ -20,7 +20,7 @@ const initialState: ProductionState = {
   orders: [],
   orderDetails: {},
   selectedOrderId: null,
-  filters: { query: "", status: "all", priority: "all" },
+  filters: { query: "", status: "all", priority: "all", plannedStartFrom: "", plannedStartTo: "" },
   page: 1,
   pageSize: 10,
   pagination: null,

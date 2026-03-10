@@ -3,13 +3,18 @@ import {
   Card,
   Chip,
   Container,
+  Button,
   InputAdornment,
   LinearProgress,
+  MenuItem,
+  Select,
   Stack,
   TextField,
-  Typography
+  Typography,
+  type SelectChangeEvent
 } from "@mui/material";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
+import AddIcon from "@mui/icons-material/Add";
 import { useEffect, useMemo } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import type { AppDataTableColumnDef } from "@app/components/AppDataTable";
@@ -27,8 +32,8 @@ export function InventoryOverviewPage() {
   const { products, allProducts, filters, page, pageSize, pagination, loading, categories, warehouses } = useInventory();
 
   useEffect(() => {
-    void dispatch(fetchInventoryOverviewData({ page, pageSize }));
-  }, [dispatch, page, pageSize]);
+    void dispatch(fetchInventoryOverviewData({ page, pageSize, filters }));
+  }, [dispatch, filters, page, pageSize]);
 
   useEffect(() => {
     if (categories.length === 0 || warehouses.length === 0) {
@@ -123,12 +128,17 @@ export function InventoryOverviewPage() {
             Products, stock levels and movements
           </Typography>
         </Box>
-        <RouterLink
-          className="inline-flex items-center gap-1 text-sm font-medium text-indigo-600 no-underline transition-colors hover:text-indigo-800"
-          to="/inventory/movements"
-        >
-          View stock movements &rarr;
-        </RouterLink>
+        <Stack direction="row" spacing={1.5}>
+          <Button component={RouterLink} to="/inventory/new" variant="contained" startIcon={<AddIcon />}>
+            Create Product
+          </Button>
+          <RouterLink
+            className="inline-flex items-center gap-1 self-center text-sm font-medium text-indigo-600 no-underline transition-colors hover:text-indigo-800"
+            to="/inventory/movements"
+          >
+            View stock movements &rarr;
+          </RouterLink>
+        </Stack>
       </Stack>
 
       <InventorySummaryCards stats={stats} />
@@ -136,25 +146,56 @@ export function InventoryOverviewPage() {
       <Card>
         {loading && <LinearProgress />}
         <Box className="p-4 pb-0">
-          <TextField
-            fullWidth
-            placeholder="Search by name, SKU or barcode..."
-            size="small"
-            value={filters.query}
-            onChange={(e) => {
-              dispatch(setInventoryPage(1));
-              dispatch(setProductFilters({ query: e.target.value }));
-            }}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchOutlinedIcon sx={{ fontSize: 18, color: "#94a3b8" }} />
-                  </InputAdornment>
-                )
-              }
-            }}
-          />
+          <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
+            <TextField
+              fullWidth
+              placeholder="Search by name, SKU or barcode..."
+              size="small"
+              value={filters.query}
+              onChange={(e) => {
+                dispatch(setInventoryPage(1));
+                dispatch(setProductFilters({ query: e.target.value }));
+              }}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchOutlinedIcon sx={{ fontSize: 18, color: "#94a3b8" }} />
+                    </InputAdornment>
+                  )
+                }
+              }}
+            />
+            <Select
+              size="small"
+              value={String(filters.status)}
+              onChange={(e: SelectChangeEvent<string>) => {
+                dispatch(setInventoryPage(1));
+                dispatch(setProductFilters({ status: e.target.value === "all" ? "all" : Number(e.target.value) as ProductStatus }));
+              }}
+              sx={{ minWidth: 180 }}
+            >
+              <MenuItem value="all">All Statuses</MenuItem>
+              <MenuItem value={ProductStatus.Draft}>Draft</MenuItem>
+              <MenuItem value={ProductStatus.Active}>Active</MenuItem>
+              <MenuItem value={ProductStatus.Inactive}>Inactive</MenuItem>
+              <MenuItem value={ProductStatus.Discontinued}>Discontinued</MenuItem>
+            </Select>
+            <Select
+              size="small"
+              value={filters.categoryId}
+              onChange={(e) => {
+                dispatch(setInventoryPage(1));
+                dispatch(setProductFilters({ categoryId: e.target.value }));
+              }}
+              sx={{ minWidth: 220 }}
+            >
+              <MenuItem value="all">All Categories</MenuItem>
+              {categories.map((category) => (
+                <MenuItem key={category.id} value={category.id}>{category.name}</MenuItem>
+              ))}
+            </Select>
+          </Stack>
         </Box>
         <Box sx={{ p: 2 }}>
           <AppDataTable

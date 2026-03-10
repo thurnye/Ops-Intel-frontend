@@ -18,7 +18,7 @@ type ShipmentsState = {
 const initialState: ShipmentsState = {
   shipments: [],
   shipmentDetails: {},
-  filters: { query: "", status: "all", type: "all", priority: "all" },
+  filters: { query: "", status: "all", type: "all", priority: "all", isCrossBorder: "all", isPartialShipment: "all" },
   page: 1,
   pageSize: 10,
   pagination: null,

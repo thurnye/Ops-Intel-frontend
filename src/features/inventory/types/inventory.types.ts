@@ -180,3 +180,30 @@ export type MovementFilters = {
   movementType: StockMovementType | "all";
   warehouseId: string | "all";
 };
+
+export type ProductUpsertPayload = {
+  id?: string;
+  name: string;
+  description?: string;
+  sku: string;
+  barcode?: string;
+  categoryId: string;
+  brandId?: string;
+  unitOfMeasureId: string;
+  costPrice: number;
+  sellingPrice: number;
+  taxRate: number;
+  reorderLevel: number;
+  reorderQuantity: number;
+  trackInventory: boolean;
+  allowBackOrder: boolean;
+  isSerialized: boolean;
+  isBatchTracked: boolean;
+  isPerishable: boolean;
+  weight: number;
+  length: number;
+  width: number;
+  height: number;
+  status: ProductStatus;
+  thumbnailImageUrl?: string;
+};

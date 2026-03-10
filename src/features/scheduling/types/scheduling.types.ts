@@ -564,16 +564,62 @@ export type ScheduleAuditLog = {
 export type SchedulePlanFilters = {
   query: string;
   status: SchedulePlanStatus | "all";
+  generationMode: ScheduleGenerationMode | "all";
+  schedulingStrategy: SchedulingStrategy | "all";
+  isActive: boolean | "all";
+  startDate: string;
+  endDate: string;
 };
 
 export type ScheduleJobFilters = {
   query: string;
   status: ScheduleJobStatus | "all";
   priority: SchedulePriority | "all";
+  materialReadinessStatus: MaterialReadinessStatus | "all";
+  isRushOrder: boolean | "all";
+  startDate: string;
+  endDate: string;
 };
 
 export type ScheduleExceptionFilters = {
   query: string;
   status: ScheduleExceptionStatus | "all";
   severity: ScheduleExceptionSeverity | "all";
+  assignedTo: string;
+  startDate: string;
+  endDate: string;
+};
+
+export type SchedulePlanUpsertPayload = {
+  planNumber?: string;
+  name: string;
+  description?: string;
+  warehouseId?: string;
+  planningStartDateUtc: string;
+  planningEndDateUtc: string;
+  generationMode: ScheduleGenerationMode;
+  schedulingStrategy: SchedulingStrategy;
+  autoSequenceEnabled: boolean;
+  autoDispatchEnabled: boolean;
+  timeZone: string;
+  isActive?: boolean;
+};
+
+export type ScheduleJobUpsertPayload = {
+  schedulePlanId?: string;
+  productionOrderId?: string;
+  orderId?: string;
+  orderItemId?: string;
+  productId?: string;
+  warehouseId?: string;
+  jobNumber?: string;
+  jobName: string;
+  notes?: string;
+  plannedQuantity: number;
+  earliestStartUtc?: string;
+  latestFinishUtc?: string;
+  dueDateUtc?: string;
+  priority: SchedulePriority;
+  isRushOrder: boolean;
+  qualityHold: boolean;
 };

@@ -24,6 +24,16 @@ export const inventoryApi = {
     return data;
   },
 
+  async createProduct(body: import("@features/inventory/types/inventory.types").ProductUpsertPayload): Promise<ApiResponse<Product>> {
+    const { data } = await apiClient.post<ApiResponse<Product>>("/inventory/products", body);
+    return data;
+  },
+
+  async updateProduct(id: string, body: import("@features/inventory/types/inventory.types").ProductUpsertPayload): Promise<ApiResponse<Product>> {
+    const { data } = await apiClient.put<ApiResponse<Product>>(`/inventory/products/${id}`, body);
+    return data;
+  },
+
   /* ── Stock ────────────────────────────────────── */
   async getProductStock(productId: string): Promise<ApiResponse<InventoryStock[]>> {
     const { data } = await apiClient.get<ApiResponse<InventoryStock[]>>(`/inventory/stocks/product/${productId}`);

@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Card,
   CardContent,
   Chip,
@@ -15,8 +16,10 @@ import {
   Typography
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { useEffect } from "react";
 import { Link as RouterLink, useParams } from "react-router-dom";
+import { FieldHelp } from "@app/components/FieldHelp";
 import { useAppDispatch, useAppSelector } from "@app/hooks/app.hooks";
 import { useOrderDetail } from "@features/orders/hooks/useOrders";
 import { fetchOrderById } from "@features/orders/redux/orders.thunks";
@@ -65,10 +68,18 @@ export function OrderDetailsPage() {
 
   const shipping = order.addresses.find((a) => a.addressType === AddressType.Shipping);
   const billing = order.addresses.find((a) => a.addressType === AddressType.Billing);
+  const quickInfoItems = [
+    { label: "Type", value: orderTypeLabel(order.orderType), help: "Order type defines the business classification of the order, such as sales, purchase, transfer, or return." },
+    { label: "Priority", value: priorityLabel(order.priority), color: priorityColor(order.priority), help: "Priority communicates the urgency of the order so operations teams can sequence work appropriately." },
+    { label: "Channel", value: channelLabel(order.channel), help: "Channel indicates how the order entered the system, such as internal entry, web, mobile, phone, email, or marketplace." },
+    { label: "Order Date", value: formatDate(order.orderDateUtc), help: "Order date captures when the order was created or recorded in the business process." },
+    ...(order.requiredDateUtc ? [{ label: "Required By", value: formatDate(order.requiredDateUtc), help: "Required by is the target date the order should be fulfilled or made available to the customer or downstream process." }] : [])
+  ];
 
   return (
     <Container maxWidth={false} disableGutters className="space-y-5">
       {/* Header */}
+      <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" alignItems={{ md: "flex-start" }} spacing={2}>
       <Box>
         <RouterLink className="mb-2 inline-flex items-center gap-1 text-sm text-indigo-600 no-underline hover:text-indigo-800" to="/orders">
           <ArrowBackIcon sx={{ fontSize: 14 }} /> Back to Orders
@@ -82,19 +93,20 @@ export function OrderDetailsPage() {
           <Typography sx={{ fontSize: 14, color: "#64748b", mt: 0.5 }}>{order.customerName}</Typography>
         )}
       </Box>
+      <Button component={RouterLink} to={`/orders/${order.id}/edit`} variant="outlined" startIcon={<EditOutlinedIcon />}>
+        Edit Order
+      </Button>
+      </Stack>
 
       {/* Quick info cards */}
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-        {[
-          { label: "Type", value: orderTypeLabel(order.orderType) },
-          { label: "Priority", value: priorityLabel(order.priority), color: priorityColor(order.priority) },
-          { label: "Channel", value: channelLabel(order.channel) },
-          { label: "Order Date", value: formatDate(order.orderDateUtc) },
-          ...(order.requiredDateUtc ? [{ label: "Required By", value: formatDate(order.requiredDateUtc) }] : [])
-        ].map((s) => (
+        {quickInfoItems.map((s) => (
           <Card key={s.label} className="flex-1">
             <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
-              <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em" }}>{s.label}</Typography>
+              <Stack direction="row" spacing={0.5} alignItems="center">
+                <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em" }}>{s.label}</Typography>
+                <FieldHelp title={s.label} description={s.help} />
+              </Stack>
               <Typography sx={{ fontSize: 14, fontWeight: 600, color: "color" in s ? s.color : "#0f172a", mt: 0.25 }}>{s.value}</Typography>
             </CardContent>
           </Card>
@@ -117,7 +129,10 @@ export function OrderDetailsPage() {
               </Stack>
               <Divider />
               <Stack direction="row" justifyContent="space-between">
-                <Typography sx={{ fontSize: 13, color: "#64748b" }}>Outstanding</Typography>
+                <Stack direction="row" spacing={0.5} alignItems="center">
+                  <Typography sx={{ fontSize: 13, color: "#64748b" }}>Outstanding</Typography>
+                  <FieldHelp title="Outstanding" description="Outstanding amount is the remaining order balance after recorded payments and refunds are applied." />
+                </Stack>
                 <Typography sx={{ fontSize: 13, fontWeight: 700, color: order.outstandingAmount > 0 ? "#f59e0b" : "#10b981" }}>
                   {formatCurrency(order.outstandingAmount, order.currencyCode)}
                 </Typography>

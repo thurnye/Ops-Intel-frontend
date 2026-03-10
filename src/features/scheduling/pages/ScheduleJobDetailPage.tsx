@@ -1,10 +1,12 @@
 import {
-  Box, Card, CardContent, Chip, Container, Grid, LinearProgress, Stack,
+  Box, Button, Card, CardContent, Chip, Container, Grid, LinearProgress, Stack,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Typography
 } from "@mui/material";
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import { Link as RouterLink, useParams } from "react-router-dom";
+import { FieldHelp } from "@app/components/FieldHelp";
 import { useAppDispatch, useAppSelector } from "@app/hooks/app.hooks";
 import { useScheduleJobDetail } from "@features/scheduling/hooks/useScheduling";
 import { fetchScheduleJobById } from "@features/scheduling/redux/scheduling.thunks";
@@ -45,45 +47,54 @@ export function ScheduleJobDetailPage() {
   }
 
   const pct = jobProgressPercent(job.completedQuantity, job.plannedQuantity);
+  const quickInfoItems = [
+    { label: "Product", value: `${job.productName ?? "—"} (${job.productSku ?? "—"})`, help: "This is the item the schedule job is planning and tracking through the scheduling workflow." },
+    { label: "Warehouse", value: job.warehouseName ?? job.warehouseId, help: "Warehouse identifies the location context for the scheduled job and its material checks." },
+    { label: "Planned Start", value: formatDateTime(job.plannedStartUtc), help: "Planned start is the scheduled time the job is expected to begin." },
+    { label: "Planned End", value: formatDateTime(job.plannedEndUtc), help: "Planned end is the scheduled finish time used for sequencing and due-date control." },
+    { label: "Actual Start", value: job.actualStartUtc ? formatDateTime(job.actualStartUtc) : "—", help: "Actual start shows when the job truly began execution, which may differ from the plan." },
+    { label: "Due Date", value: formatDate(job.dueDateUtc), help: "Due date gives the customer or operational deadline the job is scheduled to support." }
+  ];
 
   return (
     <Container maxWidth={false} disableGutters className="space-y-5">
       {/* Header */}
-      <Stack direction="row" alignItems="center" spacing={2} flexWrap="wrap">
-        <Typography variant="h4">{job.jobNumber}</Typography>
-        <Chip
-          label={jobStatusLabel(job.status)}
-          size="small"
-          sx={{ bgcolor: jobStatusColor(job.status) + "18", color: jobStatusColor(job.status), fontWeight: 600 }}
-        />
-        <Chip
-          label={priorityLabel(job.priority)}
-          size="small"
-          variant="outlined"
-          sx={{ borderColor: priorityColor(job.priority), color: priorityColor(job.priority) }}
-        />
-        <Chip
-          label={materialReadinessLabel(job.materialReadinessStatus)}
-          size="small"
-          sx={{ height: 22, fontSize: 11, bgcolor: materialReadinessColor(job.materialReadinessStatus) + "18", color: materialReadinessColor(job.materialReadinessStatus), fontWeight: 600 }}
-        />
+      <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" spacing={2}>
+        <Stack direction="row" alignItems="center" spacing={2} flexWrap="wrap">
+          <Typography variant="h4">{job.jobNumber}</Typography>
+          <Chip
+            label={jobStatusLabel(job.status)}
+            size="small"
+            sx={{ bgcolor: jobStatusColor(job.status) + "18", color: jobStatusColor(job.status), fontWeight: 600 }}
+          />
+          <Chip
+            label={priorityLabel(job.priority)}
+            size="small"
+            variant="outlined"
+            sx={{ borderColor: priorityColor(job.priority), color: priorityColor(job.priority) }}
+          />
+          <Chip
+            label={materialReadinessLabel(job.materialReadinessStatus)}
+            size="small"
+            sx={{ height: 22, fontSize: 11, bgcolor: materialReadinessColor(job.materialReadinessStatus) + "18", color: materialReadinessColor(job.materialReadinessStatus), fontWeight: 600 }}
+          />
+        </Stack>
+        <Button component={RouterLink} to={`/scheduling/jobs/${job.id}/edit`} variant="outlined" startIcon={<EditOutlinedIcon />}>
+          Edit Job
+        </Button>
       </Stack>
 
       <Typography sx={{ fontSize: 15, color: "#334155" }}>{job.jobName}</Typography>
 
       {/* Quick info */}
       <Grid container spacing={2.5}>
-        {[
-          { label: "Product", value: `${job.productName ?? "—"} (${job.productSku ?? "—"})` },
-          { label: "Warehouse", value: job.warehouseName ?? job.warehouseId },
-          { label: "Planned Start", value: formatDateTime(job.plannedStartUtc) },
-          { label: "Planned End", value: formatDateTime(job.plannedEndUtc) },
-          { label: "Actual Start", value: job.actualStartUtc ? formatDateTime(job.actualStartUtc) : "—" },
-          { label: "Due Date", value: formatDate(job.dueDateUtc) }
-        ].map((item) => (
+        {quickInfoItems.map((item) => (
           <Grid key={item.label} size={{ xs: 6, md: 4 }}>
             <Box>
-              <Typography sx={{ fontSize: 12, color: "#64748b", mb: 0.25 }}>{item.label}</Typography>
+              <Stack direction="row" spacing={0.5} alignItems="center" mb={0.25}>
+                <Typography sx={{ fontSize: 12, color: "#64748b" }}>{item.label}</Typography>
+                <FieldHelp title={item.label} description={item.help} />
+              </Stack>
               <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#0f172a" }}>{item.value}</Typography>
             </Box>
           </Grid>

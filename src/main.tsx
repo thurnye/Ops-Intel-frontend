@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import { BrowserRouter } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import { store } from "@app/stores/stores";
 import { AppRouter } from "@app/routes/AppRouter";
 import { useAuthBootstrap } from "@features/auth/hooks/useAuthBootstrap";
@@ -120,6 +121,17 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <Provider store={store}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            style: {
+              borderRadius: "12px",
+              border: "1px solid #e2e8f0",
+              background: "#ffffff",
+              color: "#0f172a"
+            }
+          }}
+        />
         <BrowserRouter>
           <Bootstrapper />
         </BrowserRouter>

@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { ordersApi } from "@features/orders/services/orders.api.service";
-import type { OrderDetail, OrderListItem } from "@features/orders/types/orders.types";
+import type { OrderDetail, OrderListItem, OrdersFilters } from "@features/orders/types/orders.types";
 import type { PaginationMeta } from "@shared/types/api.types";
 import { getApiData, getErrorMessage, getPagedItems, getPaginationMeta } from "@shared/utils/asyncThunk.utils";
 
@@ -9,11 +9,17 @@ type OrdersListPayload = {
   pagination: PaginationMeta | null;
 };
 
-export const fetchOrders = createAsyncThunk<OrdersListPayload, { page: number; pageSize: number }, { rejectValue: string }>(
+export const fetchOrders = createAsyncThunk<OrdersListPayload, { page: number; pageSize: number; filters: OrdersFilters }, { rejectValue: string }>(
   "orders/fetchOrders",
-  async ({ page, pageSize }, { rejectWithValue }) => {
+  async ({ page, pageSize, filters }, { rejectWithValue }) => {
     try {
-      const response = await ordersApi.listOrders({ pageNumber: page, pageSize });
+      const response = await ordersApi.listOrders({
+        pageNumber: page,
+        pageSize,
+        searchTerm: filters.query || undefined,
+        status: filters.status === "all" ? undefined : filters.status,
+        orderType: filters.orderType === "all" ? undefined : filters.orderType
+      });
       return {
         orders: getPagedItems(response),
         pagination: getPaginationMeta(response)

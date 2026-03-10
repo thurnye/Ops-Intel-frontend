@@ -364,4 +364,24 @@ export type ProductionFilters = {
   query: string;
   status: ProductionOrderStatus | "all";
   priority: ProductionPriority | "all";
+  plannedStartFrom: string;
+  plannedStartTo: string;
+};
+
+export type ProductionOrderUpsertPayload = {
+  productionOrderNumber?: string;
+  productId: string;
+  plannedQuantity: number;
+  unitOfMeasureId: string;
+  billOfMaterialId?: string;
+  routingId?: string;
+  warehouseId: string;
+  plannedStartDate: string;
+  plannedEndDate: string;
+  priority: ProductionPriority;
+  sourceType?: ProductionSourceType;
+  sourceReferenceId?: string;
+  batchNumber?: string;
+  lotNumber?: string;
+  notes?: string;
 };

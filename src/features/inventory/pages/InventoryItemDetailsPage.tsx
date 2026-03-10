@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Card,
   CardContent,
   Chip,
@@ -15,8 +16,10 @@ import {
   Typography
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { useEffect } from "react";
 import { Link as RouterLink, useParams } from "react-router-dom";
+import { FieldHelp } from "@app/components/FieldHelp";
 import { useAppDispatch, useAppSelector } from "@app/hooks/app.hooks";
 import { useProductById } from "@features/inventory/hooks/useInventory";
 import { fetchInventoryProductById } from "@features/inventory/redux/inventory.thunks";
@@ -52,10 +55,29 @@ export function InventoryItemDetailsPage() {
 
   const onHand = totalOnHand(product);
   const available = totalAvailable(product);
+  const quickInfoItems = [
+    {
+      label: "SKU",
+      value: product.sku,
+      help: "SKU is the product's primary business identifier. It stays stable across operational flows like stock lookup, procurement, and reporting."
+    },
+    {
+      label: "Category",
+      value: product.categoryName,
+      help: "Category groups products into stable operational or commercial classifications used for organization, reporting, and navigation."
+    },
+    { label: "Brand", value: product.brandName ?? "—", help: "Brand identifies the manufacturer or commercial brand associated with the product." },
+    {
+      label: "Unit",
+      value: product.unitOfMeasureName,
+      help: "Unit of measure defines the product's base measurement, such as pieces, boxes, kilograms, or liters."
+    }
+  ];
 
   return (
     <Container maxWidth={false} disableGutters className="space-y-5">
       {/* Header */}
+      <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" alignItems={{ md: "flex-start" }} spacing={2}>
       <Box>
         <RouterLink className="mb-2 inline-flex items-center gap-1 text-sm text-indigo-600 no-underline hover:text-indigo-800" to="/inventory">
           <ArrowBackIcon sx={{ fontSize: 14 }} /> Back to Inventory
@@ -72,18 +94,20 @@ export function InventoryItemDetailsPage() {
           <Typography sx={{ fontSize: 14, color: "#64748b", mt: 0.5 }}>{product.description}</Typography>
         )}
       </Box>
+      <Button component={RouterLink} to={`/inventory/${product.id}/edit`} variant="outlined" startIcon={<EditOutlinedIcon />}>
+        Edit Product
+      </Button>
+      </Stack>
 
       {/* Quick stats */}
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-        {[
-          { label: "SKU", value: product.sku },
-          { label: "Category", value: product.categoryName },
-          { label: "Brand", value: product.brandName ?? "—" },
-          { label: "Unit", value: product.unitOfMeasureName }
-        ].map((s) => (
+        {quickInfoItems.map((s) => (
           <Card key={s.label} className="flex-1">
             <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
-              <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em" }}>{s.label}</Typography>
+              <Stack direction="row" spacing={0.5} alignItems="center">
+                <Typography sx={{ fontSize: 11, fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em" }}>{s.label}</Typography>
+                <FieldHelp title={s.label} description={s.help} />
+              </Stack>
               <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#0f172a", mt: 0.25 }}>{s.value}</Typography>
             </CardContent>
           </Card>
@@ -134,11 +158,17 @@ export function InventoryItemDetailsPage() {
                 <Typography sx={{ fontSize: 13, fontWeight: 600 }}>{available.toLocaleString()}</Typography>
               </Stack>
               <Stack direction="row" justifyContent="space-between">
-                <Typography sx={{ fontSize: 13, color: "#64748b" }}>Reorder Level</Typography>
+                <Stack direction="row" spacing={0.5} alignItems="center">
+                  <Typography sx={{ fontSize: 13, color: "#64748b" }}>Reorder Level</Typography>
+                  <FieldHelp title="Reorder Level" description="Reorder level is the quantity threshold that signals stock should be replenished before the item risks running short." />
+                </Stack>
                 <Typography sx={{ fontSize: 13, fontWeight: 600 }}>{product.reorderLevel}</Typography>
               </Stack>
               <Stack direction="row" justifyContent="space-between">
-                <Typography sx={{ fontSize: 13, color: "#64748b" }}>Reorder Qty</Typography>
+                <Stack direction="row" spacing={0.5} alignItems="center">
+                  <Typography sx={{ fontSize: 13, color: "#64748b" }}>Reorder Qty</Typography>
+                  <FieldHelp title="Reorder Qty" description="Reorder quantity is the typical replenishment amount the business expects to purchase or produce when the product hits its reorder level." />
+                </Stack>
                 <Typography sx={{ fontSize: 13, fontWeight: 600 }}>{product.reorderQuantity}</Typography>
               </Stack>
             </Stack>

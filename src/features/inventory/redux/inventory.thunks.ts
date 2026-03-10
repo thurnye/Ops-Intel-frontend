@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { inventoryApi } from "@features/inventory/services/inventory.api.service";
-import type { Category, Product, ProductListItem, StockMovement, Warehouse } from "@features/inventory/types/inventory.types";
+import type { Category, Product, ProductFilters, ProductListItem, StockMovement, Warehouse } from "@features/inventory/types/inventory.types";
 import type { PaginationMeta } from "@shared/types/api.types";
 import { getApiData, getErrorMessage, getPagedItems, getPaginationMeta } from "@shared/utils/asyncThunk.utils";
 
@@ -19,11 +19,17 @@ type InventoryMovementsPayload = {
   warehouses: Warehouse[];
 };
 
-export const fetchInventoryOverviewData = createAsyncThunk<InventoryOverviewPayload, { page: number; pageSize: number }, { rejectValue: string }>(
+export const fetchInventoryOverviewData = createAsyncThunk<InventoryOverviewPayload, { page: number; pageSize: number; filters: ProductFilters }, { rejectValue: string }>(
   "inventory/fetchOverviewData",
-  async ({ page, pageSize }, { rejectWithValue }) => {
+  async ({ page, pageSize, filters }, { rejectWithValue }) => {
     try {
-      const productsResponse = await inventoryApi.listProducts({ pageNumber: page, pageSize });
+      const productsResponse = await inventoryApi.listProducts({
+        pageNumber: page,
+        pageSize,
+        searchTerm: filters.query || undefined,
+        status: filters.status === "all" ? undefined : filters.status,
+        categoryId: filters.categoryId === "all" ? undefined : filters.categoryId
+      });
 
       return {
         products: getPagedItems(productsResponse),

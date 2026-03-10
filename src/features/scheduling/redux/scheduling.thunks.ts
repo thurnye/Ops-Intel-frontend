@@ -2,9 +2,12 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { schedulingApi } from "@features/scheduling/services/scheduling.api.service";
 import type { PaginationMeta } from "@shared/types/api.types";
 import type {
+  ScheduleExceptionFilters,
   ScheduleException,
+  ScheduleJobFilters,
   ScheduleJob,
   ScheduleJobDetail,
+  SchedulePlanFilters,
   SchedulePlan,
   SchedulePlanDetail
 } from "@features/scheduling/types/scheduling.types";
@@ -25,11 +28,21 @@ type ScheduleExceptionsPayload = {
   exceptionsPagination: PaginationMeta | null;
 };
 
-export const fetchSchedulePlans = createAsyncThunk<SchedulePlansPayload, { page: number; pageSize: number }, { rejectValue: string }>(
+export const fetchSchedulePlans = createAsyncThunk<SchedulePlansPayload, { page: number; pageSize: number; filters: SchedulePlanFilters }, { rejectValue: string }>(
   "scheduling/fetchPlans",
-  async ({ page, pageSize }, { rejectWithValue }) => {
+  async ({ page, pageSize, filters }, { rejectWithValue }) => {
     try {
-      const plansResponse = await schedulingApi.listPlans({ pageNumber: page, pageSize });
+      const plansResponse = await schedulingApi.listPlans({
+        pageNumber: page,
+        pageSize,
+        search: filters.query || undefined,
+        status: filters.status === "all" ? undefined : filters.status,
+        generationMode: filters.generationMode === "all" ? undefined : filters.generationMode,
+        schedulingStrategy: filters.schedulingStrategy === "all" ? undefined : filters.schedulingStrategy,
+        isActive: filters.isActive === "all" ? undefined : filters.isActive,
+        startDateUtc: filters.startDate || undefined,
+        endDateUtc: filters.endDate || undefined
+      });
 
       return {
         plans: getPagedItems(plansResponse),
@@ -41,11 +54,21 @@ export const fetchSchedulePlans = createAsyncThunk<SchedulePlansPayload, { page:
   }
 );
 
-export const fetchScheduleJobs = createAsyncThunk<ScheduleJobsPayload, { page: number; pageSize: number }, { rejectValue: string }>(
+export const fetchScheduleJobs = createAsyncThunk<ScheduleJobsPayload, { page: number; pageSize: number; filters: ScheduleJobFilters }, { rejectValue: string }>(
   "scheduling/fetchJobs",
-  async ({ page, pageSize }, { rejectWithValue }) => {
+  async ({ page, pageSize, filters }, { rejectWithValue }) => {
     try {
-      const jobsResponse = await schedulingApi.listJobs({ pageNumber: page, pageSize });
+      const jobsResponse = await schedulingApi.listJobs({
+        pageNumber: page,
+        pageSize,
+        search: filters.query || undefined,
+        status: filters.status === "all" ? undefined : filters.status,
+        priority: filters.priority === "all" ? undefined : filters.priority,
+        materialReadinessStatus: filters.materialReadinessStatus === "all" ? undefined : filters.materialReadinessStatus,
+        isRushOrder: filters.isRushOrder === "all" ? undefined : filters.isRushOrder,
+        startDateUtc: filters.startDate || undefined,
+        endDateUtc: filters.endDate || undefined
+      });
 
       return {
         jobs: getPagedItems(jobsResponse),
@@ -57,11 +80,20 @@ export const fetchScheduleJobs = createAsyncThunk<ScheduleJobsPayload, { page: n
   }
 );
 
-export const fetchScheduleExceptions = createAsyncThunk<ScheduleExceptionsPayload, { page: number; pageSize: number }, { rejectValue: string }>(
+export const fetchScheduleExceptions = createAsyncThunk<ScheduleExceptionsPayload, { page: number; pageSize: number; filters: ScheduleExceptionFilters }, { rejectValue: string }>(
   "scheduling/fetchExceptions",
-  async ({ page, pageSize }, { rejectWithValue }) => {
+  async ({ page, pageSize, filters }, { rejectWithValue }) => {
     try {
-      const exceptionsResponse = await schedulingApi.listExceptions({ pageNumber: page, pageSize });
+      const exceptionsResponse = await schedulingApi.listExceptions({
+        pageNumber: page,
+        pageSize,
+        search: filters.query || undefined,
+        status: filters.status === "all" ? undefined : filters.status,
+        severity: filters.severity === "all" ? undefined : filters.severity,
+        assignedTo: filters.assignedTo || undefined,
+        startDateUtc: filters.startDate || undefined,
+        endDateUtc: filters.endDate || undefined
+      });
 
       return {
         exceptions: getPagedItems(exceptionsResponse),

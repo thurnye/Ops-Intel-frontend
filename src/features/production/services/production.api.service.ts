@@ -6,18 +6,31 @@ import type {
   ProductionExecutionSummary,
   ProductionExecution,
   WorkCenter,
-  Machine
+  Machine,
+  BillOfMaterialSummary,
+  RoutingSummary,
+  ProductionOrderUpsertPayload
 } from "@features/production/types/production.types";
 
 export const productionApi = {
   /* ── Production Orders ────────────────────────── */
-  async listOrders(params?: { pageNumber?: number; pageSize?: number }): Promise<ApiResponse<ProductionOrderSummary[]>> {
+  async listOrders(params?: { pageNumber?: number; pageSize?: number; searchTerm?: string; status?: number; priority?: number; plannedStartDateFrom?: string; plannedStartDateTo?: string }): Promise<ApiResponse<ProductionOrderSummary[]>> {
     const { data } = await apiClient.get<ApiResponse<ProductionOrderSummary[]>>("/production/orders", { params });
     return data;
   },
 
   async getOrder(id: string): Promise<ApiResponse<ProductionOrder>> {
     const { data } = await apiClient.get<ApiResponse<ProductionOrder>>(`/production/orders/${id}`);
+    return data;
+  },
+
+  async createOrder(body: ProductionOrderUpsertPayload): Promise<ApiResponse<ProductionOrder>> {
+    const { data } = await apiClient.post<ApiResponse<ProductionOrder>>("/production/orders", body);
+    return data;
+  },
+
+  async updateOrder(id: string, body: ProductionOrderUpsertPayload): Promise<ApiResponse<ProductionOrder>> {
+    const { data } = await apiClient.put<ApiResponse<ProductionOrder>>(`/production/orders/${id}`, body);
     return data;
   },
 
@@ -60,6 +73,16 @@ export const productionApi = {
   /* ── Work Centers ─────────────────────────────── */
   async listWorkCenters(params?: { pageNumber?: number; pageSize?: number }): Promise<ApiResponse<WorkCenter[]>> {
     const { data } = await apiClient.get<ApiResponse<WorkCenter[]>>("/production/work-centers", { params });
+    return data;
+  },
+
+  async listBillsOfMaterial(params?: { pageNumber?: number; pageSize?: number }): Promise<ApiResponse<BillOfMaterialSummary[]>> {
+    const { data } = await apiClient.get<ApiResponse<BillOfMaterialSummary[]>>("/production/bills-of-material", { params });
+    return data;
+  },
+
+  async listRoutings(params?: { pageNumber?: number; pageSize?: number }): Promise<ApiResponse<RoutingSummary[]>> {
+    const { data } = await apiClient.get<ApiResponse<RoutingSummary[]>>("/production/routings", { params });
     return data;
   },
 

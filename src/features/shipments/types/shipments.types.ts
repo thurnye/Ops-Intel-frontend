@@ -149,6 +149,28 @@ export type ShipmentAddress = {
   country: string;
 };
 
+export type CarrierService = {
+  id: string;
+  carrierId: string;
+  serviceCode: string;
+  name: string;
+  description?: string;
+  estimatedTransitDays: number;
+  isActive: boolean;
+};
+
+export type Carrier = {
+  id: string;
+  carrierCode: string;
+  name: string;
+  contactName?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  isActive: boolean;
+  services: CarrierService[];
+};
+
 /* ── Shipment Item ───────────────────────────────── */
 
 export type ShipmentItem = {
@@ -429,4 +451,37 @@ export type ShipmentFilters = {
   status: ShipmentStatus | "all";
   type: ShipmentType | "all";
   priority: ShipmentPriority | "all";
+  isCrossBorder: boolean | "all";
+  isPartialShipment: boolean | "all";
+};
+
+export type ShipmentUpsertPayload = {
+  orderId?: string;
+  warehouseId?: string;
+  originAddressId: string;
+  destinationAddressId: string;
+  carrierId?: string;
+  carrierServiceId?: string;
+  type?: ShipmentType;
+  priority: ShipmentPriority;
+  customerReference?: string;
+  externalReference?: string;
+  trackingNumber?: string;
+  masterTrackingNumber?: string;
+  plannedShipDateUtc?: string;
+  plannedDeliveryDateUtc?: string;
+  scheduledPickupStartUtc?: string;
+  scheduledPickupEndUtc?: string;
+  isPartialShipment?: boolean;
+  requiresSignature: boolean;
+  isFragile: boolean;
+  isHazardous: boolean;
+  isTemperatureControlled: boolean;
+  isInsured: boolean;
+  isCrossBorder: boolean;
+  currencyCode: string;
+  shippingTerms?: string;
+  incoterm?: string;
+  notes?: string;
+  internalNotes?: string;
 };

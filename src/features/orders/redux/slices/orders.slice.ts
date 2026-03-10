@@ -20,7 +20,7 @@ const initialState: OrdersState = {
   orders: [],
   orderDetails: {},
   selectedOrderId: null,
-  filters: { query: "", status: "all", orderType: "all", paymentStatus: "all" },
+  filters: { query: "", status: "all", orderType: "all" },
   page: 1,
   pageSize: 25,
   pagination: null,

@@ -182,5 +182,59 @@ export type OrdersFilters = {
   query: string;
   status: OrderStatus | "all";
   orderType: OrderType | "all";
-  paymentStatus: PaymentStatus | "all";
+};
+
+export type OrderFormItem = {
+  productId: string;
+  unitOfMeasureId?: string;
+  quantityOrdered: number;
+  unitPrice: number;
+  discountAmount: number;
+  taxAmount: number;
+  remarks?: string;
+  sortOrder: number;
+};
+
+export type OrderFormAddress = {
+  addressType: AddressType;
+  contactName: string;
+  companyName?: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  stateOrProvince: string;
+  postalCode: string;
+  country: string;
+  phoneNumber?: string;
+  email?: string;
+};
+
+export type CreateOrderPayload = {
+  customerId?: string;
+  customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  orderType: OrderType;
+  priority: OrderPriority;
+  channel: OrderChannel;
+  warehouseId?: string;
+  requiredDateUtc?: string;
+  currencyCode: string;
+  referenceNumber?: string;
+  customerPurchaseOrderNumber?: string;
+  notes?: string;
+  items: OrderFormItem[];
+  addresses: OrderFormAddress[];
+};
+
+export type UpdateOrderPayload = {
+  customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  priority: OrderPriority;
+  warehouseId?: string;
+  requiredDateUtc?: string;
+  referenceNumber?: string;
+  customerPurchaseOrderNumber?: string;
+  notes?: string;
 };

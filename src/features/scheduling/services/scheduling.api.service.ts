@@ -22,12 +22,24 @@ import type {
 
 export const schedulingApi = {
   /* ── Schedule Plans ────────────────────────────── */
-  async listPlans(params?: { pageNumber?: number; pageSize?: number }): Promise<ApiResponse<SchedulePlan[]>> {
+  async listPlans(params?: { pageNumber?: number; pageSize?: number; search?: string; status?: number; generationMode?: number; schedulingStrategy?: number; isActive?: boolean; startDateUtc?: string; endDateUtc?: string }): Promise<ApiResponse<SchedulePlan[]>> {
     const { data } = await apiClient.get<ApiResponse<SchedulePlan[]>>("/scheduling/plans", { params });
     return data;
   },
   async getPlan(id: string): Promise<ApiResponse<SchedulePlanDetail>> {
     const { data } = await apiClient.get<ApiResponse<SchedulePlanDetail>>(`/scheduling/plans/${id}`);
+    return data;
+  },
+  async createPlan(body: import("@features/scheduling/types/scheduling.types").SchedulePlanUpsertPayload): Promise<ApiResponse<SchedulePlanDetail>> {
+    const { data } = await apiClient.post<ApiResponse<SchedulePlanDetail>>("/scheduling/plans", body);
+    return data;
+  },
+  async updatePlan(id: string, body: import("@features/scheduling/types/scheduling.types").SchedulePlanUpsertPayload): Promise<ApiResponse<SchedulePlanDetail>> {
+    const { data } = await apiClient.put<ApiResponse<SchedulePlanDetail>>(`/scheduling/plans/${id}`, body);
+    return data;
+  },
+  async deletePlan(id: string): Promise<ApiResponse<null>> {
+    const { data } = await apiClient.delete<ApiResponse<null>>(`/scheduling/plans/${id}`);
     return data;
   },
   async publishPlan(id: string, body: Record<string, unknown> = {}): Promise<ApiResponse<null>> {
@@ -40,12 +52,24 @@ export const schedulingApi = {
   },
 
   /* ── Schedule Jobs ─────────────────────────────── */
-  async listJobs(params?: { pageNumber?: number; pageSize?: number }): Promise<ApiResponse<ScheduleJob[]>> {
+  async listJobs(params?: { pageNumber?: number; pageSize?: number; search?: string; status?: number; priority?: number; materialReadinessStatus?: number; isRushOrder?: boolean; startDateUtc?: string; endDateUtc?: string }): Promise<ApiResponse<ScheduleJob[]>> {
     const { data } = await apiClient.get<ApiResponse<ScheduleJob[]>>("/scheduling/jobs", { params });
     return data;
   },
   async getJob(id: string): Promise<ApiResponse<ScheduleJobDetail>> {
     const { data } = await apiClient.get<ApiResponse<ScheduleJobDetail>>(`/scheduling/jobs/${id}`);
+    return data;
+  },
+  async createJob(body: import("@features/scheduling/types/scheduling.types").ScheduleJobUpsertPayload): Promise<ApiResponse<ScheduleJobDetail>> {
+    const { data } = await apiClient.post<ApiResponse<ScheduleJobDetail>>("/scheduling/jobs", body);
+    return data;
+  },
+  async updateJob(id: string, body: import("@features/scheduling/types/scheduling.types").ScheduleJobUpsertPayload): Promise<ApiResponse<ScheduleJobDetail>> {
+    const { data } = await apiClient.put<ApiResponse<ScheduleJobDetail>>(`/scheduling/jobs/${id}`, body);
+    return data;
+  },
+  async deleteJob(id: string): Promise<ApiResponse<null>> {
+    const { data } = await apiClient.delete<ApiResponse<null>>(`/scheduling/jobs/${id}`);
     return data;
   },
   async releaseJob(id: string, body: Record<string, unknown> = {}): Promise<ApiResponse<null>> {
@@ -120,7 +144,7 @@ export const schedulingApi = {
   },
 
   /* ── Exceptions ────────────────────────────────── */
-  async listExceptions(params?: { pageNumber?: number; pageSize?: number }): Promise<ApiResponse<ScheduleException[]>> {
+  async listExceptions(params?: { pageNumber?: number; pageSize?: number; search?: string; status?: number; severity?: number; assignedTo?: string; startDateUtc?: string; endDateUtc?: string }): Promise<ApiResponse<ScheduleException[]>> {
     const { data } = await apiClient.get<ApiResponse<ScheduleException[]>>("/scheduling/exceptions", { params });
     return data;
   },

@@ -1,10 +1,12 @@
 import {
-  Box, Card, CardContent, Chip, Container, Grid, Stack,
+  Box, Button, Card, CardContent, Chip, Container, Grid, Stack,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Typography
 } from "@mui/material";
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import { Link as RouterLink, useParams } from "react-router-dom";
+import { FieldHelp } from "@app/components/FieldHelp";
 import { useAppDispatch, useAppSelector } from "@app/hooks/app.hooks";
 import { useShipmentDetail } from "@features/shipments/hooks/useShipments";
 import { fetchShipmentById } from "@features/shipments/redux/shipments.thunks";
@@ -47,34 +49,59 @@ export function ShipmentDetailsPage() {
 
   const dest = shipment.destinationAddress;
   const origin = shipment.originAddress;
+  const quickInfoItems = [
+    { label: "Order", value: shipment.orderNumber ?? "—" },
+    {
+      label: "Carrier",
+      value: `${shipment.carrierName ?? "—"} ${shipment.carrierServiceName ? `(${shipment.carrierServiceName})` : ""}`,
+      help: "The carrier is the logistics provider handling the movement of this shipment. Carrier service identifies the specific shipping service or speed selected under that provider."
+    },
+    {
+      label: "Tracking",
+      value: shipment.trackingNumber ?? "—",
+      help: "Tracking identifies the shipment in the carrier network so operations and support can follow lifecycle events such as dispatched, in transit, out for delivery, and delivered."
+    },
+    { label: "Warehouse", value: shipment.warehouseName },
+    { label: "Ship Date", value: shipment.actualShipDateUtc ? formatDateTime(shipment.actualShipDateUtc) : shipment.plannedShipDateUtc ? `Planned: ${formatDate(shipment.plannedShipDateUtc)}` : "—" },
+    { label: "Est. Delivery", value: shipment.plannedDeliveryDateUtc ? formatDate(shipment.plannedDeliveryDateUtc) : "—" },
+    {
+      label: "Shipping Terms",
+      value: shipment.shippingTerms ?? "—",
+      help: "Shipping terms capture the commercial delivery arrangement between parties, such as who arranges transport and where responsibility for the shipment changes hands."
+    },
+    {
+      label: "Incoterm",
+      value: shipment.incoterm ?? "—",
+      help: "Incoterm is the standardized international trade term that defines responsibilities, cost ownership, and risk transfer between seller and buyer during shipment."
+    },
+    { label: "Customer Ref", value: shipment.customerReference ?? "—" }
+  ];
 
   return (
     <Container maxWidth={false} disableGutters className="space-y-5">
       {/* Header */}
-      <Stack direction="row" alignItems="center" spacing={2} flexWrap="wrap">
-        <Typography variant="h4">{shipment.shipmentNumber}</Typography>
-        <Chip label={shipmentStatusLabel(shipment.status)} size="small" sx={{ bgcolor: shipmentStatusColor(shipment.status) + "18", color: shipmentStatusColor(shipment.status), fontWeight: 600 }} />
-        <Chip label={shipmentTypeLabel(shipment.type)} size="small" variant="outlined" />
-        <Chip label={shipmentPriorityLabel(shipment.priority)} size="small" variant="outlined" sx={{ borderColor: shipmentPriorityColor(shipment.priority), color: shipmentPriorityColor(shipment.priority) }} />
-        {shipment.isCrossBorder && <Chip label="Cross-border" size="small" sx={{ height: 22, fontSize: 11, bgcolor: "#dbeafe", color: "#2563eb" }} />}
+      <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" spacing={2}>
+        <Stack direction="row" alignItems="center" spacing={2} flexWrap="wrap">
+          <Typography variant="h4">{shipment.shipmentNumber}</Typography>
+          <Chip label={shipmentStatusLabel(shipment.status)} size="small" sx={{ bgcolor: shipmentStatusColor(shipment.status) + "18", color: shipmentStatusColor(shipment.status), fontWeight: 600 }} />
+          <Chip label={shipmentTypeLabel(shipment.type)} size="small" variant="outlined" />
+          <Chip label={shipmentPriorityLabel(shipment.priority)} size="small" variant="outlined" sx={{ borderColor: shipmentPriorityColor(shipment.priority), color: shipmentPriorityColor(shipment.priority) }} />
+          {shipment.isCrossBorder && <Chip label="Cross-border" size="small" sx={{ height: 22, fontSize: 11, bgcolor: "#dbeafe", color: "#2563eb" }} />}
+        </Stack>
+        <Button component={RouterLink} to={`/shipments/${shipment.id}/edit`} variant="outlined" startIcon={<EditOutlinedIcon />}>
+          Edit Shipment
+        </Button>
       </Stack>
 
       {/* Quick info */}
       <Grid container spacing={2.5}>
-        {[
-          { label: "Order", value: shipment.orderNumber ?? "—" },
-          { label: "Carrier", value: `${shipment.carrierName ?? "—"} ${shipment.carrierServiceName ? `(${shipment.carrierServiceName})` : ""}` },
-          { label: "Tracking", value: shipment.trackingNumber ?? "—" },
-          { label: "Warehouse", value: shipment.warehouseName },
-          { label: "Ship Date", value: shipment.actualShipDateUtc ? formatDateTime(shipment.actualShipDateUtc) : shipment.plannedShipDateUtc ? `Planned: ${formatDate(shipment.plannedShipDateUtc)}` : "—" },
-          { label: "Est. Delivery", value: shipment.plannedDeliveryDateUtc ? formatDate(shipment.plannedDeliveryDateUtc) : "—" },
-          { label: "Shipping Terms", value: shipment.shippingTerms ?? "—" },
-          { label: "Incoterm", value: shipment.incoterm ?? "—" },
-          { label: "Customer Ref", value: shipment.customerReference ?? "—" }
-        ].map((item) => (
+        {quickInfoItems.map((item) => (
           <Grid key={item.label} size={{ xs: 6, md: 4 }}>
             <Box>
-              <Typography sx={{ fontSize: 12, color: "#64748b", mb: 0.25 }}>{item.label}</Typography>
+              <Stack direction="row" spacing={0.5} alignItems="center" mb={0.25}>
+                <Typography sx={{ fontSize: 12, color: "#64748b" }}>{item.label}</Typography>
+                {item.help ? <FieldHelp title={item.label} description={item.help} /> : null}
+              </Stack>
               <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#0f172a" }}>{item.value}</Typography>
             </Box>
           </Grid>

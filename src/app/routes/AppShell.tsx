@@ -3,6 +3,7 @@ import {
   Avatar,
   Badge,
   Box,
+  Collapse,
   Drawer,
   IconButton,
   List,
@@ -27,8 +28,9 @@ import NotificationsActiveOutlinedIcon from "@mui/icons-material/NotificationsAc
 import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
+import FiberManualRecordRoundedIcon from "@mui/icons-material/FiberManualRecordRounded";
 import { useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@features/auth/hooks/useAuth";
 
 const drawerWidth = 260;
@@ -36,7 +38,12 @@ const appBarHeight = 56;
 
 interface NavSection {
   group: string;
-  items: { label: string; to: string; icon: React.ReactNode }[];
+  items: {
+    label: string;
+    to: string;
+    icon: React.ReactNode;
+    children?: { label: string; to: string }[];
+  }[];
 }
 
 const navSections: NavSection[] = [
@@ -44,11 +51,61 @@ const navSections: NavSection[] = [
     group: "Operations",
     items: [
       { label: "Dashboard", to: "/dashboard", icon: <DashboardOutlinedIcon fontSize="small" /> },
-      { label: "Orders", to: "/orders", icon: <ReceiptLongOutlinedIcon fontSize="small" /> },
-      { label: "Production", to: "/production", icon: <PrecisionManufacturingOutlinedIcon fontSize="small" /> },
-      { label: "Scheduling", to: "/scheduling", icon: <CalendarMonthOutlinedIcon fontSize="small" /> },
-      { label: "Inventory", to: "/inventory", icon: <Inventory2OutlinedIcon fontSize="small" /> },
-      { label: "Shipments", to: "/shipments", icon: <LocalShippingOutlinedIcon fontSize="small" /> }
+      {
+        label: "Orders",
+        to: "/orders",
+        icon: <ReceiptLongOutlinedIcon fontSize="small" />,
+        children: [
+          { label: "Overview", to: "/orders" },
+          { label: "Customer Contacts", to: "/orders/customer-contacts" }
+        ]
+      },
+      {
+        label: "Production",
+        to: "/production",
+        icon: <PrecisionManufacturingOutlinedIcon fontSize="small" />,
+        children: [
+          { label: "Overview", to: "/production" },
+          { label: "Routings", to: "/production/routings" },
+          { label: "Labor Logs", to: "/production/labor-logs" },
+          { label: "Machines", to: "/production/machines" }
+        ]
+      },
+      {
+        label: "Scheduling",
+        to: "/scheduling",
+        icon: <CalendarMonthOutlinedIcon fontSize="small" />,
+        children: [
+          { label: "Overview", to: "/scheduling" },
+          { label: "Shifts", to: "/scheduling/shifts" },
+          { label: "Calendars", to: "/scheduling/calendars" },
+          { label: "Dispatch", to: "/scheduling/dispatch" }
+        ]
+      },
+      {
+        label: "Inventory",
+        to: "/inventory",
+        icon: <Inventory2OutlinedIcon fontSize="small" />,
+        children: [
+          { label: "Overview", to: "/inventory" },
+          { label: "Catalogs", to: "/inventory/catalogs" },
+          { label: "Stock Movements", to: "/inventory/movements" },
+          { label: "Brands", to: "/inventory/brands" },
+          { label: "Warehouses", to: "/inventory/warehouses" },
+          { label: "Suppliers", to: "/inventory/suppliers" }
+        ]
+      },
+      {
+        label: "Shipments",
+        to: "/shipments",
+        icon: <LocalShippingOutlinedIcon fontSize="small" />,
+        children: [
+          { label: "Overview", to: "/shipments" },
+          { label: "Shipments", to: "/shipments/records" },
+          { label: "Carriers", to: "/shipments/carriers" },
+          { label: "Lanes", to: "/shipments/lanes" }
+        ]
+      }
     ]
   },
   {
@@ -71,6 +128,7 @@ const navSections: NavSection[] = [
 export function AppShell() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, logout } = useAuth();
+  const location = useLocation();
 
   const signOut = () => {
     logout();
@@ -96,37 +154,70 @@ export function AppShell() {
             </Typography>
             <List disablePadding>
               {section.items.map((item) => (
-                <ListItemButton
-                  component={NavLink}
-                  key={item.label}
-                  onClick={() => setMobileOpen(false)}
-                  sx={{
-                    borderRadius: "10px",
-                    mb: "2px",
-                    px: 1.5,
-                    py: 1,
-                    color: "#64748b",
-                    transition: "all 0.15s ease",
-                    "&:hover": {
-                      bgcolor: "#f8fafc",
-                      color: "#0f172a"
-                    },
-                    "&.active": {
-                      bgcolor: "#eef2ff",
-                      color: "#4f46e5",
-                      "& .MuiListItemIcon-root": { color: "#4f46e5" }
-                    }
-                  }}
-                  to={item.to}
-                >
-                  <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>
-                    {item.icon}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={item.label}
-                    slotProps={{ primary: { sx: { fontSize: 13, fontWeight: 500 } } }}
-                  />
-                </ListItemButton>
+                <Box key={item.label}>
+                  <ListItemButton
+                    component={NavLink}
+                    onClick={() => setMobileOpen(false)}
+                    sx={{
+                      borderRadius: "12px",
+                      mb: item.children?.length ? 0.5 : "2px",
+                      px: 1.5,
+                      py: 1,
+                      color: "#64748b",
+                      transition: "all 0.15s ease",
+                      "&:hover": {
+                        bgcolor: "#f8fafc",
+                        color: "#0f172a"
+                      },
+                      "&.active": {
+                        bgcolor: "#eef2ff",
+                        color: "#4f46e5",
+                        "& .MuiListItemIcon-root": { color: "#4f46e5" }
+                      }
+                    }}
+                    to={item.to}
+                    end={!item.children?.length}
+                  >
+                    <ListItemIcon sx={{ minWidth: 36, color: "inherit" }}>
+                      {item.icon}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={item.label}
+                      slotProps={{ primary: { sx: { fontSize: 13, fontWeight: 600 } } }}
+                    />
+                  </ListItemButton>
+                  {item.children?.length ? (
+                    <Collapse in={location.pathname.startsWith(item.to)} timeout="auto" unmountOnExit={false}>
+                      <List disablePadding sx={{ pl: 5, pr: 1, pb: 0.5 }}>
+                        {item.children.map((child) => (
+                          <ListItemButton
+                            component={NavLink}
+                            end
+                            key={child.to}
+                            onClick={() => setMobileOpen(false)}
+                            sx={{
+                              borderRadius: "10px",
+                              minHeight: 34,
+                              px: 1.25,
+                              color: "#64748b",
+                              "&:hover": { bgcolor: "#f8fafc", color: "#0f172a" },
+                              "&.active": {
+                                bgcolor: "#eff6ff",
+                                color: "#1d4ed8"
+                              }
+                            }}
+                            to={child.to}
+                          >
+                            <ListItemIcon sx={{ minWidth: 22, color: "inherit" }}>
+                              <FiberManualRecordRoundedIcon sx={{ fontSize: 8 }} />
+                            </ListItemIcon>
+                            <ListItemText primary={child.label} slotProps={{ primary: { sx: { fontSize: 12.5, fontWeight: 500 } } }} />
+                          </ListItemButton>
+                        ))}
+                      </List>
+                    </Collapse>
+                  ) : null}
+                </Box>
               ))}
             </List>
           </Box>

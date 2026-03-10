@@ -6,13 +6,17 @@ const OrdersListPage = lazy(() => import("@features/orders/pages/OrdersListPage"
 const OrderDetailsPage = lazy(() => import("@features/orders/pages/OrderDetailsPage").then((module) => ({ default: module.OrderDetailsPage })));
 const OrderEditorPage = lazy(() => import("@features/orders/pages/OrderEditorPage").then((module) => ({ default: module.OrderEditorPage })));
 const OrderTrackingPage = lazy(() => import("@features/orders/pages/OrderTrackingPage").then((module) => ({ default: module.OrderTrackingPage })));
+const OrdersCustomerContactsPage = lazy(() => import("@features/orders/pages/OrdersCustomerContactsPage").then((module) => ({ default: module.OrdersCustomerContactsPage })));
 
 export function OrdersRoutes() {
   return (
     <Suspense fallback={<RouteLoading label="Loading orders..." />}>
       <Routes>
         <Route index element={<OrdersListPage />} />
+        <Route path="overview" element={<Navigate replace to="/orders" />} />
+        <Route path="customer-contacts" element={<OrdersCustomerContactsPage />} />
         <Route path="new" element={<OrderEditorPage />} />
+        <Route path=":orderId/edit" element={<OrderEditorPage />} />
         <Route path=":orderId" element={<OrderDetailsPage />} />
         <Route path=":orderId/tracking" element={<OrderTrackingPage />} />
         <Route path="*" element={<Navigate replace to="." />} />

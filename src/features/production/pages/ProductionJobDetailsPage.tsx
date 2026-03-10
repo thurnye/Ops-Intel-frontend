@@ -1,10 +1,12 @@
 import {
-  Box, Card, CardContent, Chip, Container, Grid, LinearProgress,
+  Box, Button, Card, CardContent, Chip, Container, Grid, LinearProgress,
   Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Typography
 } from "@mui/material";
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import { Link as RouterLink, useParams } from "react-router-dom";
+import { FieldHelp } from "@app/components/FieldHelp";
 import { useAppDispatch, useAppSelector } from "@app/hooks/app.hooks";
 import { useProductionOrderDetail } from "@features/production/hooks/useProduction";
 import { fetchProductionOrderById } from "@features/production/redux/production.thunks";
@@ -44,41 +46,50 @@ export function ProductionJobDetailsPage() {
   }
 
   const pct = progressPercent(order);
+  const quickInfoItems = [
+    { label: "Product", value: `${order.productName} (${order.productSku})`, help: "This is the finished good or produced item the production order is planned to manufacture." },
+    { label: "Source", value: sourceTypeLabel(order.sourceType) + (order.sourceReferenceId ? ` — ${order.sourceReferenceId}` : ""), help: "Source identifies which upstream demand or planning record caused this production order to exist." },
+    { label: "Warehouse", value: order.warehouseName, help: "Warehouse is the inventory location and operational context tied to the production order." },
+    { label: "BOM", value: order.billOfMaterialName ?? "—", help: "BOM stands for Bill of Material. It is the manufacturing recipe that defines which materials and quantities are required to make the product." },
+    { label: "Routing", value: order.routingName ?? "—", help: "Routing defines the process path, work centers, and operation sequence used to manufacture the product." },
+    { label: "Batch", value: order.batchNumber ?? "—", help: "Batch identifies the production lot for traceability across materials, output, and quality events." },
+    { label: "Planned Start", value: formatDate(order.plannedStartDate), help: "Planned start is the target date the order is expected to begin execution." },
+    { label: "Planned End", value: formatDate(order.plannedEndDate), help: "Planned end is the target completion date used for scheduling and capacity planning." },
+    { label: "Actual Start", value: order.actualStartDate ? formatDate(order.actualStartDate) : "—", help: "Actual start records when production execution truly began, which may differ from the plan." }
+  ];
 
   return (
     <Container maxWidth={false} disableGutters className="space-y-5">
       {/* Header */}
-      <Stack direction="row" alignItems="center" spacing={2} flexWrap="wrap">
-        <Typography variant="h4">{order.productionOrderNumber}</Typography>
-        <Chip
-          label={orderStatusLabel(order.status)}
-          size="small"
-          sx={{ bgcolor: orderStatusColor(order.status) + "18", color: orderStatusColor(order.status), fontWeight: 600 }}
-        />
-        <Chip
-          label={priorityLabel(order.priority)}
-          size="small"
-          variant="outlined"
-          sx={{ borderColor: priorityColor(order.priority), color: priorityColor(order.priority) }}
-        />
+      <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" spacing={2}>
+        <Stack direction="row" alignItems="center" spacing={2} flexWrap="wrap">
+          <Typography variant="h4">{order.productionOrderNumber}</Typography>
+          <Chip
+            label={orderStatusLabel(order.status)}
+            size="small"
+            sx={{ bgcolor: orderStatusColor(order.status) + "18", color: orderStatusColor(order.status), fontWeight: 600 }}
+          />
+          <Chip
+            label={priorityLabel(order.priority)}
+            size="small"
+            variant="outlined"
+            sx={{ borderColor: priorityColor(order.priority), color: priorityColor(order.priority) }}
+          />
+        </Stack>
+        <Button component={RouterLink} to={`/production/${order.id}/edit`} variant="outlined" startIcon={<EditOutlinedIcon />}>
+          Edit Order
+        </Button>
       </Stack>
 
       {/* Quick info cards */}
       <Grid container spacing={2.5}>
-        {[
-          { label: "Product", value: `${order.productName} (${order.productSku})` },
-          { label: "Source", value: sourceTypeLabel(order.sourceType) + (order.sourceReferenceId ? ` — ${order.sourceReferenceId}` : "") },
-          { label: "Warehouse", value: order.warehouseName },
-          { label: "BOM", value: order.billOfMaterialName ?? "—" },
-          { label: "Routing", value: order.routingName ?? "—" },
-          { label: "Batch", value: order.batchNumber ?? "—" },
-          { label: "Planned Start", value: formatDate(order.plannedStartDate) },
-          { label: "Planned End", value: formatDate(order.plannedEndDate) },
-          { label: "Actual Start", value: order.actualStartDate ? formatDate(order.actualStartDate) : "—" }
-        ].map((item) => (
+        {quickInfoItems.map((item) => (
           <Grid key={item.label} size={{ xs: 6, md: 4 }}>
             <Box>
-              <Typography sx={{ fontSize: 12, color: "#64748b", mb: 0.25 }}>{item.label}</Typography>
+              <Stack direction="row" spacing={0.5} alignItems="center" mb={0.25}>
+                <Typography sx={{ fontSize: 12, color: "#64748b" }}>{item.label}</Typography>
+                <FieldHelp title={item.label} description={item.help} />
+              </Stack>
               <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#0f172a" }}>{item.value}</Typography>
             </Box>
           </Grid>
@@ -103,7 +114,10 @@ export function ProductionJobDetailsPage() {
               <Typography sx={{ fontWeight: 700, fontSize: 18, color: "#f59e0b" }}>{order.remainingQuantity}</Typography>
             </Box>
             <Box>
-              <Typography sx={{ fontSize: 12, color: "#64748b" }}>Scrap</Typography>
+              <Stack direction="row" spacing={0.5} alignItems="center">
+                <Typography sx={{ fontSize: 12, color: "#64748b" }}>Scrap</Typography>
+                <FieldHelp title="Scrap" description="Scrap is the unusable or defective quantity produced during manufacturing and is tracked explicitly for traceability and performance analysis." />
+              </Stack>
               <Typography sx={{ fontWeight: 700, fontSize: 18, color: "#ef4444" }}>{order.scrapQuantity ?? 0}</Typography>
             </Box>
           </Stack>

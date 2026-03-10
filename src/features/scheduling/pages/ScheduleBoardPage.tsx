@@ -1,19 +1,30 @@
 import {
-  Box, Card, CardContent, Chip, Container, Grid, LinearProgress, Stack,
+  Box, Button, Card, CardContent, Chip, Container, Grid, LinearProgress, Stack,
   TextField, InputAdornment, Typography, MenuItem, Select, type SelectChangeEvent,
   Tab, Tabs
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import AddIcon from "@mui/icons-material/Add";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import type { AppDataTableColumnDef } from "@app/components/AppDataTable";
 import { AppDataTable } from "@app/components/AppDataTable";
 import { useSchedulePlans, useScheduleJobs, useScheduleExceptions } from "@features/scheduling/hooks/useScheduling";
 import { useAppDispatch } from "@app/hooks/app.hooks";
 import { fetchScheduleExceptions, fetchScheduleJobs, fetchSchedulePlans } from "@features/scheduling/redux/scheduling.thunks";
-import { setExceptionsPage, setJobFilters, setJobsPage, setPlanFilters, setPlansPage, setSchedulingPageSize } from "@features/scheduling/redux/slices/scheduling.slice";
+import { setExceptionFilters, setExceptionsPage, setJobFilters, setJobsPage, setPlanFilters, setPlansPage, setSchedulingPageSize } from "@features/scheduling/redux/slices/scheduling.slice";
 import {
-  SchedulePlanStatus, ScheduleJobStatus, SchedulePriority, type ScheduleException, type ScheduleJob, type SchedulePlan
+  MaterialReadinessStatus,
+  ScheduleExceptionSeverity,
+  ScheduleExceptionStatus,
+  ScheduleGenerationMode,
+  SchedulePlanStatus,
+  ScheduleJobStatus,
+  SchedulePriority,
+  SchedulingStrategy,
+  type ScheduleException,
+  type ScheduleJob,
+  type SchedulePlan
 } from "@features/scheduling/types/scheduling.types";
 import {
   planStatusLabel, planStatusColor,
@@ -30,21 +41,21 @@ export function ScheduleBoardPage() {
   const [tab, setTab] = useState(0);
   const { plans, allPlans, planFilters, page: plansPage, pageSize, pagination: plansPagination } = useSchedulePlans();
   const { jobs, allJobs, jobFilters, page: jobsPage, pagination: jobsPagination } = useScheduleJobs();
-  const { exceptions, page: exceptionsPage, pagination: exceptionsPagination } = useScheduleExceptions();
+  const { exceptions, exceptionFilters, page: exceptionsPage, pagination: exceptionsPagination } = useScheduleExceptions();
 
   useEffect(() => {
     if (tab === 0) {
-      void dispatch(fetchSchedulePlans({ page: plansPage, pageSize }));
+      void dispatch(fetchSchedulePlans({ page: plansPage, pageSize, filters: planFilters }));
       return;
     }
 
     if (tab === 1) {
-      void dispatch(fetchScheduleJobs({ page: jobsPage, pageSize }));
+      void dispatch(fetchScheduleJobs({ page: jobsPage, pageSize, filters: jobFilters }));
       return;
     }
 
-    void dispatch(fetchScheduleExceptions({ page: exceptionsPage, pageSize }));
-  }, [dispatch, exceptionsPage, jobsPage, pageSize, plansPage, tab]);
+    void dispatch(fetchScheduleExceptions({ page: exceptionsPage, pageSize, filters: exceptionFilters }));
+  }, [dispatch, exceptionFilters, exceptionsPage, jobFilters, jobsPage, pageSize, planFilters, plansPage, tab]);
 
   const running = allJobs.filter((j) => j.status === ScheduleJobStatus.Running).length;
   const blocked = allJobs.filter((j) => j.status === ScheduleJobStatus.Blocked || j.status === ScheduleJobStatus.Delayed).length;
@@ -188,12 +199,22 @@ export function ScheduleBoardPage() {
 
   return (
     <Container maxWidth={false} disableGutters className="space-y-6">
-      <Box>
-        <Typography variant="h4">Scheduling</Typography>
-        <Typography sx={{ fontSize: 14, color: "#64748b", mt: 0.5 }}>
-          Manage schedule plans, jobs, and monitor exceptions
-        </Typography>
-      </Box>
+      <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" alignItems={{ md: "center" }} spacing={2}>
+        <Box>
+          <Typography variant="h4">Scheduling</Typography>
+          <Typography sx={{ fontSize: 14, color: "#64748b", mt: 0.5 }}>
+            Manage schedule plans, jobs, and monitor exceptions
+          </Typography>
+        </Box>
+        <Stack direction="row" spacing={1.5}>
+          <Button component={RouterLink} to="/scheduling/plans/new" variant="contained" startIcon={<AddIcon />}>
+            New Plan
+          </Button>
+          <Button component={RouterLink} to="/scheduling/jobs/new" variant="outlined" startIcon={<AddIcon />}>
+            New Job
+          </Button>
+        </Stack>
+      </Stack>
 
       <Grid container spacing={2.5}>
         {stats.map((s) => (
@@ -223,14 +244,20 @@ export function ScheduleBoardPage() {
                 size="small"
                 placeholder="Search plans..."
                 value={planFilters.query}
-                onChange={(e) => dispatch(setPlanFilters({ query: e.target.value }))}
+                onChange={(e) => {
+                  dispatch(setPlansPage(1));
+                  dispatch(setPlanFilters({ query: e.target.value }));
+                }}
                 slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon sx={{ fontSize: 18, color: "#94a3b8" }} /></InputAdornment> } }}
                 sx={{ minWidth: 260 }}
               />
               <Select
                 size="small"
                 value={String(planFilters.status)}
-                onChange={(e: SelectChangeEvent<string>) => dispatch(setPlanFilters({ status: e.target.value === "all" ? "all" : Number(e.target.value) as SchedulePlanStatus }))}
+                onChange={(e: SelectChangeEvent<string>) => {
+                  dispatch(setPlansPage(1));
+                  dispatch(setPlanFilters({ status: e.target.value === "all" ? "all" : Number(e.target.value) as SchedulePlanStatus }));
+                }}
                 sx={{ minWidth: 150 }}
               >
                 <MenuItem value="all">All Statuses</MenuItem>
@@ -240,6 +267,71 @@ export function ScheduleBoardPage() {
                 <MenuItem value={SchedulePlanStatus.Closed}>Closed</MenuItem>
                 <MenuItem value={SchedulePlanStatus.Cancelled}>Cancelled</MenuItem>
               </Select>
+              <Select
+                size="small"
+                value={String(planFilters.generationMode)}
+                onChange={(e: SelectChangeEvent<string>) => {
+                  dispatch(setPlansPage(1));
+                  dispatch(setPlanFilters({ generationMode: e.target.value === "all" ? "all" : Number(e.target.value) as ScheduleGenerationMode }));
+                }}
+                sx={{ minWidth: 160 }}
+              >
+                <MenuItem value="all">All Modes</MenuItem>
+                <MenuItem value={ScheduleGenerationMode.Manual}>Manual</MenuItem>
+                <MenuItem value={ScheduleGenerationMode.SemiAutomatic}>Semi-auto</MenuItem>
+                <MenuItem value={ScheduleGenerationMode.Automatic}>Automatic</MenuItem>
+              </Select>
+              <Select
+                size="small"
+                value={String(planFilters.schedulingStrategy)}
+                onChange={(e: SelectChangeEvent<string>) => {
+                  dispatch(setPlansPage(1));
+                  dispatch(setPlanFilters({ schedulingStrategy: e.target.value === "all" ? "all" : Number(e.target.value) as SchedulingStrategy }));
+                }}
+                sx={{ minWidth: 180 }}
+              >
+                <MenuItem value="all">All Strategies</MenuItem>
+                <MenuItem value={SchedulingStrategy.Forward}>Forward</MenuItem>
+                <MenuItem value={SchedulingStrategy.Backward}>Backward</MenuItem>
+                <MenuItem value={SchedulingStrategy.FiniteCapacity}>Finite Capacity</MenuItem>
+                <MenuItem value={SchedulingStrategy.InfiniteCapacity}>Infinite Capacity</MenuItem>
+                <MenuItem value={SchedulingStrategy.ConstraintBased}>Constraint Based</MenuItem>
+              </Select>
+              <Select
+                size="small"
+                value={String(planFilters.isActive)}
+                onChange={(e: SelectChangeEvent<string>) => {
+                  dispatch(setPlansPage(1));
+                  dispatch(setPlanFilters({ isActive: e.target.value === "all" ? "all" : e.target.value === "true" }));
+                }}
+                sx={{ minWidth: 140 }}
+              >
+                <MenuItem value="all">All States</MenuItem>
+                <MenuItem value="true">Active</MenuItem>
+                <MenuItem value="false">Inactive</MenuItem>
+              </Select>
+              <TextField
+                size="small"
+                type="date"
+                label="Start From"
+                value={planFilters.startDate}
+                onChange={(e) => {
+                  dispatch(setPlansPage(1));
+                  dispatch(setPlanFilters({ startDate: e.target.value }));
+                }}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+              <TextField
+                size="small"
+                type="date"
+                label="End To"
+                value={planFilters.endDate}
+                onChange={(e) => {
+                  dispatch(setPlansPage(1));
+                  dispatch(setPlanFilters({ endDate: e.target.value }));
+                }}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
             </Stack>
             <Card>
               <CardContent sx={{ p: 2 }}>
@@ -273,14 +365,20 @@ export function ScheduleBoardPage() {
                 size="small"
                 placeholder="Search jobs..."
                 value={jobFilters.query}
-                onChange={(e) => dispatch(setJobFilters({ query: e.target.value }))}
+                onChange={(e) => {
+                  dispatch(setJobsPage(1));
+                  dispatch(setJobFilters({ query: e.target.value }));
+                }}
                 slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon sx={{ fontSize: 18, color: "#94a3b8" }} /></InputAdornment> } }}
                 sx={{ minWidth: 260 }}
               />
               <Select
                 size="small"
                 value={String(jobFilters.status)}
-                onChange={(e: SelectChangeEvent<string>) => dispatch(setJobFilters({ status: e.target.value === "all" ? "all" : Number(e.target.value) as ScheduleJobStatus }))}
+                onChange={(e: SelectChangeEvent<string>) => {
+                  dispatch(setJobsPage(1));
+                  dispatch(setJobFilters({ status: e.target.value === "all" ? "all" : Number(e.target.value) as ScheduleJobStatus }));
+                }}
                 sx={{ minWidth: 150 }}
               >
                 <MenuItem value="all">All Statuses</MenuItem>
@@ -297,7 +395,10 @@ export function ScheduleBoardPage() {
               <Select
                 size="small"
                 value={String(jobFilters.priority)}
-                onChange={(e: SelectChangeEvent<string>) => dispatch(setJobFilters({ priority: e.target.value === "all" ? "all" : Number(e.target.value) as SchedulePriority }))}
+                onChange={(e: SelectChangeEvent<string>) => {
+                  dispatch(setJobsPage(1));
+                  dispatch(setJobFilters({ priority: e.target.value === "all" ? "all" : Number(e.target.value) as SchedulePriority }));
+                }}
                 sx={{ minWidth: 140 }}
               >
                 <MenuItem value="all">All Priorities</MenuItem>
@@ -307,6 +408,56 @@ export function ScheduleBoardPage() {
                 <MenuItem value={SchedulePriority.Urgent}>Urgent</MenuItem>
                 <MenuItem value={SchedulePriority.Critical}>Critical</MenuItem>
               </Select>
+              <Select
+                size="small"
+                value={String(jobFilters.materialReadinessStatus)}
+                onChange={(e: SelectChangeEvent<string>) => {
+                  dispatch(setJobsPage(1));
+                  dispatch(setJobFilters({ materialReadinessStatus: e.target.value === "all" ? "all" : Number(e.target.value) as MaterialReadinessStatus }));
+                }}
+                sx={{ minWidth: 190 }}
+              >
+                <MenuItem value="all">All Material States</MenuItem>
+                <MenuItem value={MaterialReadinessStatus.Ready}>Ready</MenuItem>
+                <MenuItem value={MaterialReadinessStatus.PartiallyReady}>Partially Ready</MenuItem>
+                <MenuItem value={MaterialReadinessStatus.Shortage}>Shortage</MenuItem>
+                <MenuItem value={MaterialReadinessStatus.Blocked}>Blocked</MenuItem>
+              </Select>
+              <Select
+                size="small"
+                value={String(jobFilters.isRushOrder)}
+                onChange={(e: SelectChangeEvent<string>) => {
+                  dispatch(setJobsPage(1));
+                  dispatch(setJobFilters({ isRushOrder: e.target.value === "all" ? "all" : e.target.value === "true" }));
+                }}
+                sx={{ minWidth: 150 }}
+              >
+                <MenuItem value="all">All Rush Flags</MenuItem>
+                <MenuItem value="true">Rush Only</MenuItem>
+                <MenuItem value="false">Standard Only</MenuItem>
+              </Select>
+              <TextField
+                size="small"
+                type="date"
+                label="Start From"
+                value={jobFilters.startDate}
+                onChange={(e) => {
+                  dispatch(setJobsPage(1));
+                  dispatch(setJobFilters({ startDate: e.target.value }));
+                }}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+              <TextField
+                size="small"
+                type="date"
+                label="End To"
+                value={jobFilters.endDate}
+                onChange={(e) => {
+                  dispatch(setJobsPage(1));
+                  dispatch(setJobFilters({ endDate: e.target.value }));
+                }}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
             </Stack>
             <Card>
               <CardContent sx={{ p: 2 }}>
@@ -334,26 +485,103 @@ export function ScheduleBoardPage() {
 
         {/* ── Exceptions Tab ─────────────────────── */}
         {tab === 2 && (
-          <Card>
-            <CardContent sx={{ p: 2 }}>
-              <AppDataTable
-                columns={exceptionColumns}
-                data={exceptions}
-                emptyState="No exceptions."
-                manualPagination
-                pageIndex={exceptionsPage - 1}
-                pageSize={pageSize}
-                totalRows={exceptionsPagination?.total ?? 0}
-                onPageChange={(pageIndex) => dispatch(setExceptionsPage(pageIndex + 1))}
-                onPageSizeChange={(nextPageSize) => {
-                  dispatch(setSchedulingPageSize(nextPageSize));
-                  dispatch(setPlansPage(1));
-                  dispatch(setJobsPage(1));
+          <>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={2}>
+              <TextField
+                size="small"
+                placeholder="Search exceptions..."
+                value={exceptionFilters.query}
+                onChange={(e) => {
                   dispatch(setExceptionsPage(1));
+                  dispatch(setExceptionFilters({ query: e.target.value }));
                 }}
+                slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon sx={{ fontSize: 18, color: "#94a3b8" }} /></InputAdornment> } }}
+                sx={{ minWidth: 260 }}
               />
-            </CardContent>
-          </Card>
+              <Select
+                size="small"
+                value={String(exceptionFilters.status)}
+                onChange={(e: SelectChangeEvent<string>) => {
+                  dispatch(setExceptionsPage(1));
+                  dispatch(setExceptionFilters({ status: e.target.value === "all" ? "all" : Number(e.target.value) as ScheduleExceptionStatus }));
+                }}
+                sx={{ minWidth: 160 }}
+              >
+                <MenuItem value="all">All Statuses</MenuItem>
+                <MenuItem value={ScheduleExceptionStatus.Open}>Open</MenuItem>
+                <MenuItem value={ScheduleExceptionStatus.Investigating}>Investigating</MenuItem>
+                <MenuItem value={ScheduleExceptionStatus.Resolved}>Resolved</MenuItem>
+                <MenuItem value={ScheduleExceptionStatus.Ignored}>Ignored</MenuItem>
+              </Select>
+              <Select
+                size="small"
+                value={String(exceptionFilters.severity)}
+                onChange={(e: SelectChangeEvent<string>) => {
+                  dispatch(setExceptionsPage(1));
+                  dispatch(setExceptionFilters({ severity: e.target.value === "all" ? "all" : Number(e.target.value) as ScheduleExceptionSeverity }));
+                }}
+                sx={{ minWidth: 150 }}
+              >
+                <MenuItem value="all">All Severities</MenuItem>
+                <MenuItem value={ScheduleExceptionSeverity.Low}>Low</MenuItem>
+                <MenuItem value={ScheduleExceptionSeverity.Medium}>Medium</MenuItem>
+                <MenuItem value={ScheduleExceptionSeverity.High}>High</MenuItem>
+                <MenuItem value={ScheduleExceptionSeverity.Critical}>Critical</MenuItem>
+              </Select>
+              <TextField
+                size="small"
+                placeholder="Assigned to..."
+                value={exceptionFilters.assignedTo}
+                onChange={(e) => {
+                  dispatch(setExceptionsPage(1));
+                  dispatch(setExceptionFilters({ assignedTo: e.target.value }));
+                }}
+                sx={{ minWidth: 180 }}
+              />
+              <TextField
+                size="small"
+                type="date"
+                label="Detected From"
+                value={exceptionFilters.startDate}
+                onChange={(e) => {
+                  dispatch(setExceptionsPage(1));
+                  dispatch(setExceptionFilters({ startDate: e.target.value }));
+                }}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+              <TextField
+                size="small"
+                type="date"
+                label="Detected To"
+                value={exceptionFilters.endDate}
+                onChange={(e) => {
+                  dispatch(setExceptionsPage(1));
+                  dispatch(setExceptionFilters({ endDate: e.target.value }));
+                }}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+            </Stack>
+            <Card>
+              <CardContent sx={{ p: 2 }}>
+                <AppDataTable
+                  columns={exceptionColumns}
+                  data={exceptions}
+                  emptyState="No exceptions."
+                  manualPagination
+                  pageIndex={exceptionsPage - 1}
+                  pageSize={pageSize}
+                  totalRows={exceptionsPagination?.total ?? 0}
+                  onPageChange={(pageIndex) => dispatch(setExceptionsPage(pageIndex + 1))}
+                  onPageSizeChange={(nextPageSize) => {
+                    dispatch(setSchedulingPageSize(nextPageSize));
+                    dispatch(setPlansPage(1));
+                    dispatch(setJobsPage(1));
+                    dispatch(setExceptionsPage(1));
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </>
         )}
       </Box>
     </Container>

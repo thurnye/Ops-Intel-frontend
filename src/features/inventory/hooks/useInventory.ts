@@ -5,26 +5,9 @@ import { ProductStatus } from "@features/inventory/types/inventory.types";
 export function useInventory() {
   const { products, productFilters, loading, page, pageSize, pagination, categories, warehouses } = useAppSelector((s) => s.inventory);
 
-  const filtered = useMemo(() => {
-    let result = products;
-    const q = productFilters.query.toLowerCase();
-    if (q) {
-      result = result.filter(
-        (p) => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q) || (p.barcode?.toLowerCase().includes(q))
-      );
-    }
-    if (productFilters.status !== "all") {
-      result = result.filter((p) => p.status === productFilters.status);
-    }
-    if (productFilters.categoryId !== "all") {
-      result = result.filter((p) => p.categoryId === productFilters.categoryId);
-    }
-    return result;
-  }, [products, productFilters]);
-
   const activeCount = products.filter((p) => p.status === ProductStatus.Active).length;
 
-  return { products: filtered, allProducts: products, activeCount, loading, filters: productFilters, page, pageSize, pagination, categories, warehouses };
+  return { products, allProducts: products, activeCount, loading, filters: productFilters, page, pageSize, pagination, categories, warehouses };
 }
 
 export function useProductById(id: string | undefined) {
