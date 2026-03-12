@@ -162,6 +162,20 @@ export type SchedulingLookup = {
   name: string;
 };
 
+export type ShiftMetricsSummary = {
+  totalShifts: number;
+  activeShifts: number;
+  overnightShifts: number;
+  workCentersRepresented: number;
+};
+
+export type DispatchMetricsSummary = {
+  totalJobs: number;
+  releasedJobs: number;
+  runningJobs: number;
+  openBlockers: number;
+};
+
 export type SchedulingDateRange = {
   startUtc: string;
   endUtc: string;

@@ -8,7 +8,9 @@ import type {
   ShipmentSummary,
   ReturnShipment,
   ShipmentAddress,
-  ShipmentUpsertPayload
+  ShipmentUpsertPayload,
+  CarrierMetricsSummary,
+  ShipmentAddressMetricsSummary
 } from "@features/shipments/types/shipments.types";
 
 export const shipmentsApi = {
@@ -33,8 +35,8 @@ export const shipmentsApi = {
     const { data } = await apiClient.delete<ApiResponse<null>>(`/shipments/${id}`);
     return data;
   },
-  async getSummary(): Promise<ApiResponse<ShipmentSummary>> {
-    const { data } = await apiClient.get<ApiResponse<ShipmentSummary>>("/shipments/summary");
+  async getSummary(params?: { search?: string; status?: number; type?: number; priority?: number; isCrossBorder?: boolean; isPartialShipment?: boolean }): Promise<ApiResponse<ShipmentSummary>> {
+    const { data } = await apiClient.get<ApiResponse<ShipmentSummary>>("/shipments/summary", { params });
     return data;
   },
   async updateStatus(id: string, status: number): Promise<ApiResponse<null>> {
@@ -57,6 +59,11 @@ export const shipmentsApi = {
     return data;
   },
 
+  async getCarriersSummary(params?: { search?: string; isActive?: boolean }): Promise<ApiResponse<CarrierMetricsSummary>> {
+    const { data } = await apiClient.get<ApiResponse<CarrierMetricsSummary>>("/shipment-carriers/summary", { params });
+    return data;
+  },
+
   async listCarrierServices(carrierId: string, params?: { isActive?: boolean }): Promise<ApiResponse<CarrierService[]>> {
     const { data } = await apiClient.get<ApiResponse<CarrierService[]>>(`/shipment-carriers/${carrierId}/services`, { params });
     return data;
@@ -64,6 +71,11 @@ export const shipmentsApi = {
 
   async searchAddresses(params?: { search?: string; country?: string; city?: string; take?: number }): Promise<ApiResponse<ShipmentAddress[]>> {
     const { data } = await apiClient.get<ApiResponse<ShipmentAddress[]>>("/shipment-addresses/search", { params });
+    return data;
+  },
+
+  async getAddressesSummary(params?: { search?: string; country?: string; city?: string }): Promise<ApiResponse<ShipmentAddressMetricsSummary>> {
+    const { data } = await apiClient.get<ApiResponse<ShipmentAddressMetricsSummary>>("/shipment-addresses/summary", { params });
     return data;
   }
 };

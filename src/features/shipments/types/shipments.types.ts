@@ -171,6 +171,20 @@ export type Carrier = {
   services: CarrierService[];
 };
 
+export type CarrierMetricsSummary = {
+  totalCarriers: number;
+  activeCarriers: number;
+  contactableCarriers: number;
+  totalServices: number;
+};
+
+export type ShipmentAddressMetricsSummary = {
+  totalAddresses: number;
+  countriesRepresented: number;
+  citiesRepresented: number;
+  companyBackedAddresses: number;
+};
+
 /* ── Shipment Item ───────────────────────────────── */
 
 export type ShipmentItem = {
@@ -433,6 +447,7 @@ export type Shipment = {
 export type ShipmentSummary = {
   totalShipments: number;
   draftShipments: number;
+  processingShipments: number;
   readyToDispatchShipments: number;
   inTransitShipments: number;
   deliveredShipments: number;

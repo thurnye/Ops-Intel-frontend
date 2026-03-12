@@ -9,7 +9,11 @@ import type {
   Machine,
   BillOfMaterialSummary,
   RoutingSummary,
-  ProductionOrderUpsertPayload
+  ProductionOrderUpsertPayload,
+  RoutingMetricsSummary,
+  MachineMetricsSummary,
+  ProductionExecutionMetricsSummary,
+  ProductionOrderMetricsSummary
 } from "@features/production/types/production.types";
 
 export const productionApi = {
@@ -21,6 +25,11 @@ export const productionApi = {
 
   async getOrder(id: string): Promise<ApiResponse<ProductionOrder>> {
     const { data } = await apiClient.get<ApiResponse<ProductionOrder>>(`/production/orders/${id}`);
+    return data;
+  },
+
+  async getOrdersSummary(params?: { searchTerm?: string; status?: number; priority?: number; plannedStartDateFrom?: string; plannedStartDateTo?: string }): Promise<ApiResponse<ProductionOrderMetricsSummary>> {
+    const { data } = await apiClient.get<ApiResponse<ProductionOrderMetricsSummary>>("/production/orders/summary", { params });
     return data;
   },
 
@@ -86,9 +95,24 @@ export const productionApi = {
     return data;
   },
 
+  async getRoutingsSummary(): Promise<ApiResponse<RoutingMetricsSummary>> {
+    const { data } = await apiClient.get<ApiResponse<RoutingMetricsSummary>>("/production/routings/summary");
+    return data;
+  },
+
   /* ── Machines ─────────────────────────────────── */
   async listMachines(params?: { pageNumber?: number; pageSize?: number }): Promise<ApiResponse<Machine[]>> {
     const { data } = await apiClient.get<ApiResponse<Machine[]>>("/production/machines", { params });
+    return data;
+  },
+
+  async getMachinesSummary(): Promise<ApiResponse<MachineMetricsSummary>> {
+    const { data } = await apiClient.get<ApiResponse<MachineMetricsSummary>>("/production/machines/summary");
+    return data;
+  },
+
+  async getExecutionsSummary(): Promise<ApiResponse<ProductionExecutionMetricsSummary>> {
+    const { data } = await apiClient.get<ApiResponse<ProductionExecutionMetricsSummary>>("/production/executions/summary");
     return data;
   }
 };

@@ -9,8 +9,10 @@ import type {
   UnitOfMeasure,
   Warehouse,
   Supplier,
-  InventoryStock
+  InventoryStock,
+  ProductMetricsSummary
 } from "@features/inventory/types/inventory.types";
+import type { BrandMetricsSummary, WarehouseMetricsSummary, SupplierMetricsSummary } from "@features/inventory/types/inventory.types";
 
 export const inventoryApi = {
   /* ── Products ─────────────────────────────────── */
@@ -21,6 +23,11 @@ export const inventoryApi = {
 
   async getProduct(id: string): Promise<ApiResponse<Product>> {
     const { data } = await apiClient.get<ApiResponse<Product>>(`/inventory/products/${id}`);
+    return data;
+  },
+
+  async getProductsSummary(params?: { searchTerm?: string; status?: number; categoryId?: string }): Promise<ApiResponse<ProductMetricsSummary>> {
+    const { data } = await apiClient.get<ApiResponse<ProductMetricsSummary>>("/inventory/products/summary", { params });
     return data;
   },
 
@@ -62,6 +69,11 @@ export const inventoryApi = {
     return data;
   },
 
+  async getBrandsSummary(): Promise<ApiResponse<BrandMetricsSummary>> {
+    const { data } = await apiClient.get<ApiResponse<BrandMetricsSummary>>("/inventory/brands/summary");
+    return data;
+  },
+
   async listUnits(): Promise<ApiResponse<UnitOfMeasure[]>> {
     const { data } = await apiClient.get<ApiResponse<UnitOfMeasure[]>>("/inventory/unit-of-measures");
     return data;
@@ -72,8 +84,18 @@ export const inventoryApi = {
     return data;
   },
 
+  async getWarehousesSummary(): Promise<ApiResponse<WarehouseMetricsSummary>> {
+    const { data } = await apiClient.get<ApiResponse<WarehouseMetricsSummary>>("/inventory/warehouses/summary");
+    return data;
+  },
+
   async listSuppliers(): Promise<ApiResponse<Supplier[]>> {
     const { data } = await apiClient.get<ApiResponse<Supplier[]>>("/inventory/suppliers");
+    return data;
+  },
+
+  async getSuppliersSummary(): Promise<ApiResponse<SupplierMetricsSummary>> {
+    const { data } = await apiClient.get<ApiResponse<SupplierMetricsSummary>>("/inventory/suppliers/summary");
     return data;
   }
 };

@@ -1,6 +1,6 @@
 import { Box, Button, Card, CardContent, Container, Grid, InputAdornment, MenuItem, Select, Stack, TextField, Typography, type SelectChangeEvent } from "@mui/material";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { Link as RouterLink } from "react-router-dom";
 import { useAppDispatch } from "@app/hooks/app.hooks";
@@ -8,25 +8,33 @@ import { useOrders } from "@features/orders/hooks/useOrders";
 import { fetchOrders } from "@features/orders/redux/orders.thunks";
 import { setOrdersFilters, setOrdersPage, setOrdersPageSize } from "@features/orders/redux/slices/orders.slice";
 import { OrdersTable } from "@features/orders/components/OrdersTable";
+import { ordersApi } from "@features/orders/services/orders.api.service";
+import type { OrderOverviewMetricsSummary } from "@features/orders/types/orders.types";
 import { OrderStatus, OrderType } from "@features/orders/types/orders.types";
+import { getApiData, getErrorMessage } from "@shared/utils/asyncThunk.utils";
 
 export function OrdersListPage() {
   const dispatch = useAppDispatch();
   const { orders, allOrders, filters, page, pageSize, pagination } = useOrders();
+  const [summary, setSummary] = useState<OrderOverviewMetricsSummary | null>(null);
 
   useEffect(() => {
     void dispatch(fetchOrders({ page, pageSize, filters }));
   }, [dispatch, filters, page, pageSize]);
 
-  const processing = allOrders.filter((o) => o.status === OrderStatus.Processing).length;
-  const shipped = allOrders.filter((o) => o.status === OrderStatus.Shipped || o.status === OrderStatus.Delivered).length;
-  const awaitingAction = allOrders.filter((o) => o.status === OrderStatus.PendingApproval || o.status === OrderStatus.Approved).length;
+  useEffect(() => {
+    void ordersApi.getOverviewSummary()
+      .then((response) => setSummary(getApiData(response, null)))
+      .catch((error) => {
+        console.error(getErrorMessage(error, "Failed to load order overview summary."));
+      });
+  }, []);
 
   const stats = [
-    { label: "Total Orders", value: pagination?.total ?? allOrders.length, color: "#6366f1" },
-    { label: "Awaiting Action", value: awaitingAction, color: "#8b5cf6" },
-    { label: "Processing", value: processing, color: "#3b82f6" },
-    { label: "Shipped / Delivered", value: shipped, color: "#10b981" }
+    { label: "Total Orders", value: summary?.totalOrders ?? pagination?.total ?? allOrders.length, color: "#6366f1" },
+    { label: "Awaiting Action", value: summary?.awaitingAction ?? 0, color: "#8b5cf6" },
+    { label: "Processing", value: summary?.processing ?? 0, color: "#3b82f6" },
+    { label: "Shipped / Delivered", value: summary?.shippedOrDelivered ?? 0, color: "#10b981" }
   ];
 
   return (

@@ -308,6 +308,36 @@ export type ProductionExecution = ProductionExecutionSummary & {
   qualityChecks: ProductionQualityCheck[];
 };
 
+export type RoutingMetricsSummary = {
+  totalRoutings: number;
+  activeRoutings: number;
+  defaultRoutings: number;
+  productCoverage: number;
+};
+
+export type MachineMetricsSummary = {
+  totalMachines: number;
+  runningMachines: number;
+  maintenanceMachines: number;
+  downMachines: number;
+  workCentersRepresented: number;
+};
+
+export type ProductionExecutionMetricsSummary = {
+  totalExecutions: number;
+  runningExecutions: number;
+  pausedExecutions: number;
+  completedExecutions: number;
+};
+
+export type ProductionOrderMetricsSummary = {
+  totalOrders: number;
+  inProgressOrders: number;
+  pausedOrders: number;
+  completedOrders: number;
+  plannedOrDraftOrders: number;
+};
+
 /* ── Production Order ─────────────────────────────── */
 
 export type ProductionOrderSummary = {

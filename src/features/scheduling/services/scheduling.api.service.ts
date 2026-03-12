@@ -17,7 +17,9 @@ import type {
   ScheduleRevision,
   ScheduleRescheduleHistory,
   ScheduleStatusHistory,
-  ScheduleAuditLog
+  ScheduleAuditLog,
+  ShiftMetricsSummary,
+  DispatchMetricsSummary
 } from "@features/scheduling/types/scheduling.types";
 
 export const schedulingApi = {
@@ -72,6 +74,10 @@ export const schedulingApi = {
     const { data } = await apiClient.delete<ApiResponse<null>>(`/scheduling/jobs/${id}`);
     return data;
   },
+  async getDispatchSummary(): Promise<ApiResponse<DispatchMetricsSummary>> {
+    const { data } = await apiClient.get<ApiResponse<DispatchMetricsSummary>>("/scheduling/jobs/dispatch-summary");
+    return data;
+  },
   async releaseJob(id: string, body: Record<string, unknown> = {}): Promise<ApiResponse<null>> {
     const { data } = await apiClient.post<ApiResponse<null>>(`/scheduling/jobs/${id}/release`, body);
     return data;
@@ -124,6 +130,10 @@ export const schedulingApi = {
   },
   async getShift(id: string): Promise<ApiResponse<Shift>> {
     const { data } = await apiClient.get<ApiResponse<Shift>>(`/scheduling/shifts/${id}`);
+    return data;
+  },
+  async getShiftsSummary(): Promise<ApiResponse<ShiftMetricsSummary>> {
+    const { data } = await apiClient.get<ApiResponse<ShiftMetricsSummary>>("/scheduling/shifts/summary");
     return data;
   },
 

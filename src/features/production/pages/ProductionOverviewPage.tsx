@@ -3,13 +3,14 @@ import {
   TextField, InputAdornment, Typography, MenuItem, Select, type SelectChangeEvent
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import type { AppDataTableColumnDef } from "@app/components/AppDataTable";
 import { AppDataTable } from "@app/components/AppDataTable";
 import { useProduction } from "@features/production/hooks/useProduction";
 import { useAppDispatch } from "@app/hooks/app.hooks";
+import { productionApi } from "@features/production/services/production.api.service";
 import { fetchProductionOrders } from "@features/production/redux/production.thunks";
 import { setProductionFilters, setProductionPage, setProductionPageSize } from "@features/production/redux/slices/production.slice";
 import { ProductionOrderStatus, ProductionPriority, type ProductionOrderSummary } from "@features/production/types/production.types";
@@ -17,27 +18,52 @@ import {
   orderStatusLabel, orderStatusColor, priorityLabel, priorityColor,
   progressPercent, formatDate
 } from "@features/production/utils/production.utils";
+import { getApiData, getErrorMessage } from "@shared/utils/asyncThunk.utils";
 
 export function ProductionOverviewPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { orders, allOrders, filters, page, pageSize, pagination } = useProduction();
+  const { orders, filters, page, pageSize, pagination } = useProduction();
+  const [summary, setSummary] = useState({
+    totalOrders: 0,
+    inProgressOrders: 0,
+    pausedOrders: 0,
+    completedOrders: 0,
+    plannedOrDraftOrders: 0
+  });
+  const [summaryError, setSummaryError] = useState<string | null>(null);
 
   useEffect(() => {
     void dispatch(fetchProductionOrders({ page, pageSize, filters }));
   }, [dispatch, filters, page, pageSize]);
 
-  const inProgress = allOrders.filter((o) => o.status === ProductionOrderStatus.InProgress).length;
-  const paused = allOrders.filter((o) => o.status === ProductionOrderStatus.Paused).length;
-  const completed = allOrders.filter((o) => o.status === ProductionOrderStatus.Completed).length;
-  const planned = allOrders.filter((o) => o.status === ProductionOrderStatus.Planned || o.status === ProductionOrderStatus.Draft).length;
+  useEffect(() => {
+    void productionApi.getOrdersSummary({
+      searchTerm: filters.query || undefined,
+      status: filters.status === "all" ? undefined : filters.status,
+      priority: filters.priority === "all" ? undefined : filters.priority,
+      plannedStartDateFrom: filters.plannedStartFrom || undefined,
+      plannedStartDateTo: filters.plannedStartTo || undefined
+    })
+      .then((response) => {
+        setSummary(getApiData(response, {
+          totalOrders: 0,
+          inProgressOrders: 0,
+          pausedOrders: 0,
+          completedOrders: 0,
+          plannedOrDraftOrders: 0
+        }));
+        setSummaryError(null);
+      })
+      .catch((error) => setSummaryError(getErrorMessage(error, "Failed to load production summary.")));
+  }, [filters.plannedStartFrom, filters.plannedStartTo, filters.priority, filters.query, filters.status]);
 
   const stats = [
-    { label: "Total Orders", value: pagination?.total ?? allOrders.length, color: "#6366f1" },
-    { label: "In Progress", value: inProgress, color: "#f59e0b" },
-    { label: "Paused", value: paused, color: "#f97316" },
-    { label: "Completed", value: completed, color: "#10b981" },
-    { label: "Planned / Draft", value: planned, color: "#8b5cf6" }
+    { label: "Total Orders", value: summary.totalOrders, color: "#6366f1" },
+    { label: "In Progress", value: summary.inProgressOrders, color: "#f59e0b" },
+    { label: "Paused", value: summary.pausedOrders, color: "#f97316" },
+    { label: "Completed", value: summary.completedOrders, color: "#10b981" },
+    { label: "Planned / Draft", value: summary.plannedOrDraftOrders, color: "#8b5cf6" }
   ];
 
   const columns = useMemo<AppDataTableColumnDef<ProductionOrderSummary>[]>(
@@ -142,6 +168,9 @@ export function ProductionOverviewPage() {
           </Grid>
         ))}
       </Grid>
+      {summaryError ? (
+        <Typography sx={{ fontSize: 13, color: "#b91c1c" }}>{summaryError}</Typography>
+      ) : null}
 
       {/* Filters */}
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>

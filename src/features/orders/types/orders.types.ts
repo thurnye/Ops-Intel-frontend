@@ -238,3 +238,17 @@ export type UpdateOrderPayload = {
   customerPurchaseOrderNumber?: string;
   notes?: string;
 };
+
+export type OrderCustomerMetricsSummary = {
+  totalCustomers: number;
+  repeatCustomers: number;
+  totalValue: number;
+  averageCustomerValue: number;
+};
+
+export type OrderOverviewMetricsSummary = {
+  totalOrders: number;
+  awaitingAction: number;
+  processing: number;
+  shippedOrDelivered: number;
+};

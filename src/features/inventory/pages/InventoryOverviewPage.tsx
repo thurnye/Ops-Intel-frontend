@@ -15,25 +15,54 @@ import {
 } from "@mui/material";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import AddIcon from "@mui/icons-material/Add";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import type { AppDataTableColumnDef } from "@app/components/AppDataTable";
 import { AppDataTable } from "@app/components/AppDataTable";
 import { useInventory } from "@features/inventory/hooks/useInventory";
 import { useAppDispatch } from "@app/hooks/app.hooks";
+import { inventoryApi } from "@features/inventory/services/inventory.api.service";
 import { ProductStatus, type ProductListItem } from "@features/inventory/types/inventory.types";
 import { setInventoryPage, setInventoryPageSize, setProductFilters } from "@features/inventory/redux/slices/inventory.slice";
 import { fetchInventoryOverviewData, fetchInventoryReferenceData } from "@features/inventory/redux/inventory.thunks";
 import { InventorySummaryCards } from "@features/inventory/components/InventorySummaryCard";
 import { formatCurrency, productStatusColor, productStatusLabel } from "@features/inventory/utils/inventory.utils";
+import { getApiData, getErrorMessage } from "@shared/utils/asyncThunk.utils";
 
 export function InventoryOverviewPage() {
   const dispatch = useAppDispatch();
-  const { products, allProducts, filters, page, pageSize, pagination, loading, categories, warehouses } = useInventory();
+  const { products, filters, page, pageSize, pagination, loading, categories, warehouses } = useInventory();
+  const [summary, setSummary] = useState({
+    totalProducts: 0,
+    activeProducts: 0,
+    draftProducts: 0,
+    inactiveProducts: 0,
+    discontinuedProducts: 0
+  });
+  const [summaryError, setSummaryError] = useState<string | null>(null);
 
   useEffect(() => {
     void dispatch(fetchInventoryOverviewData({ page, pageSize, filters }));
   }, [dispatch, filters, page, pageSize]);
+
+  useEffect(() => {
+    void inventoryApi.getProductsSummary({
+      searchTerm: filters.query || undefined,
+      status: filters.status === "all" ? undefined : filters.status,
+      categoryId: filters.categoryId === "all" ? undefined : filters.categoryId
+    })
+      .then((response) => {
+        setSummary(getApiData(response, {
+          totalProducts: 0,
+          activeProducts: 0,
+          draftProducts: 0,
+          inactiveProducts: 0,
+          discontinuedProducts: 0
+        }));
+        setSummaryError(null);
+      })
+      .catch((error) => setSummaryError(getErrorMessage(error, "Failed to load inventory summary.")));
+  }, [filters.categoryId, filters.query, filters.status]);
 
   useEffect(() => {
     if (categories.length === 0 || warehouses.length === 0) {
@@ -41,21 +70,11 @@ export function InventoryOverviewPage() {
     }
   }, [categories.length, dispatch, warehouses.length]);
 
-  const statusCounts = useMemo(
-    () => ({
-      active: allProducts.filter((product) => product.status === ProductStatus.Active).length,
-      draft: allProducts.filter((product) => product.status === ProductStatus.Draft).length,
-      inactive: allProducts.filter((product) => product.status === ProductStatus.Inactive).length,
-      discontinued: allProducts.filter((product) => product.status === ProductStatus.Discontinued).length
-    }),
-    [allProducts]
-  );
-
   const stats = [
-    { label: "Catalog Total", value: pagination?.total ?? allProducts.length, color: "#6366f1" },
-    { label: "Active", value: statusCounts.active, color: "#10b981" },
-    { label: "Draft", value: statusCounts.draft, color: "#3b82f6" },
-    { label: "Inactive / Discontinued", value: statusCounts.inactive + statusCounts.discontinued, color: "#f59e0b" }
+    { label: "Catalog Total", value: summary.totalProducts, color: "#6366f1" },
+    { label: "Active", value: summary.activeProducts, color: "#10b981" },
+    { label: "Draft", value: summary.draftProducts, color: "#3b82f6" },
+    { label: "Inactive / Discontinued", value: summary.inactiveProducts + summary.discontinuedProducts, color: "#f59e0b" }
   ];
 
   const columns = useMemo<AppDataTableColumnDef<ProductListItem>[]>(
@@ -142,6 +161,11 @@ export function InventoryOverviewPage() {
       </Stack>
 
       <InventorySummaryCards stats={stats} />
+      {summaryError ? (
+        <Typography sx={{ fontSize: 13, color: "#b91c1c" }}>
+          {summaryError}
+        </Typography>
+      ) : null}
 
       <Card>
         {loading && <LinearProgress />}

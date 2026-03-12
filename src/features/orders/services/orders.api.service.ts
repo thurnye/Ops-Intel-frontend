@@ -1,10 +1,20 @@
 import { apiClient } from "@shared/services/apiClient.service";
 import type { ApiResponse } from "@shared/types/api.types";
-import type { CreateOrderPayload, OrderListItem, OrderDetail, UpdateOrderPayload } from "@features/orders/types/orders.types";
+import type { CreateOrderPayload, OrderListItem, OrderDetail, UpdateOrderPayload, OrderCustomerMetricsSummary, OrderOverviewMetricsSummary } from "@features/orders/types/orders.types";
 
 export const ordersApi = {
   async listOrders(params?: { pageNumber?: number; pageSize?: number; searchTerm?: string; status?: number; orderType?: number; warehouseId?: string }): Promise<ApiResponse<OrderListItem[]>> {
     const { data } = await apiClient.get<ApiResponse<OrderListItem[]>>("/orders", { params });
+    return data;
+  },
+
+  async getCustomerSummary(): Promise<ApiResponse<OrderCustomerMetricsSummary>> {
+    const { data } = await apiClient.get<ApiResponse<OrderCustomerMetricsSummary>>("/orders/customer-summary");
+    return data;
+  },
+
+  async getOverviewSummary(): Promise<ApiResponse<OrderOverviewMetricsSummary>> {
+    const { data } = await apiClient.get<ApiResponse<OrderOverviewMetricsSummary>>("/orders/overview-summary");
     return data;
   },
 

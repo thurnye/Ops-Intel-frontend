@@ -155,6 +155,34 @@ export type Supplier = {
   notes?: string;
 };
 
+export type BrandMetricsSummary = {
+  totalBrands: number;
+  brandsWithDescriptions: number;
+  descriptionCoveragePercentage: number;
+};
+
+export type WarehouseMetricsSummary = {
+  totalWarehouses: number;
+  activeWarehouses: number;
+  countriesRepresented: number;
+  addressReadyWarehouses: number;
+};
+
+export type SupplierMetricsSummary = {
+  totalSuppliers: number;
+  activeSuppliers: number;
+  contactableSuppliers: number;
+  countriesRepresented: number;
+};
+
+export type ProductMetricsSummary = {
+  totalProducts: number;
+  activeProducts: number;
+  draftProducts: number;
+  inactiveProducts: number;
+  discontinuedProducts: number;
+};
+
 export type ProductSupplier = {
   id: string;
   productId: string;

@@ -4,7 +4,7 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { ShipmentsTable } from "@features/shipments/components/ShipmentsTable";
 import { useShipments } from "@features/shipments/hooks/useShipments";
@@ -12,26 +12,53 @@ import { useAppDispatch } from "@app/hooks/app.hooks";
 import { fetchShipments } from "@features/shipments/redux/shipments.thunks";
 import { setShipmentFilters, setShipmentsPage, setShipmentsPageSize } from "@features/shipments/redux/slices/shipments.slice";
 import { ShipmentStatus, ShipmentType, ShipmentPriority } from "@features/shipments/types/shipments.types";
+import { shipmentsApi } from "@features/shipments/services/shipments.api.service";
+import { getApiData, getErrorMessage } from "@shared/utils/asyncThunk.utils";
 
 export function ShipmentsListPage() {
   const dispatch = useAppDispatch();
-  const { shipments, allShipments, filters, page, pageSize, pagination } = useShipments();
+  const { shipments, filters, page, pageSize, pagination } = useShipments();
+  const [summary, setSummary] = useState({
+    totalShipments: 0,
+    processingShipments: 0,
+    inTransitShipments: 0,
+    deliveredShipments: 0,
+    failedShipments: 0
+  });
+  const [summaryError, setSummaryError] = useState<string | null>(null);
 
   useEffect(() => {
     void dispatch(fetchShipments({ page, pageSize, filters }));
   }, [dispatch, filters, page, pageSize]);
 
-  const inTransit = allShipments.filter((s) => s.status === ShipmentStatus.InTransit || s.status === ShipmentStatus.OutForDelivery || s.status === ShipmentStatus.Dispatched).length;
-  const processing = allShipments.filter((s) => [ShipmentStatus.AwaitingAllocation, ShipmentStatus.Allocated, ShipmentStatus.Picking, ShipmentStatus.Picked, ShipmentStatus.Packing, ShipmentStatus.Packed, ShipmentStatus.ReadyToDispatch].includes(s.status)).length;
-  const delivered = allShipments.filter((s) => s.status === ShipmentStatus.Delivered).length;
-  const failed = allShipments.filter((s) => s.status === ShipmentStatus.DeliveryFailed).length;
+  useEffect(() => {
+    void shipmentsApi.getSummary({
+      search: filters.query || undefined,
+      status: filters.status === "all" ? undefined : filters.status,
+      type: filters.type === "all" ? undefined : filters.type,
+      priority: filters.priority === "all" ? undefined : filters.priority,
+      isCrossBorder: filters.isCrossBorder === "all" ? undefined : filters.isCrossBorder,
+      isPartialShipment: filters.isPartialShipment === "all" ? undefined : filters.isPartialShipment
+    })
+      .then((response) => {
+        setSummary(getApiData(response, {
+          totalShipments: 0,
+          processingShipments: 0,
+          inTransitShipments: 0,
+          deliveredShipments: 0,
+          failedShipments: 0
+        }));
+        setSummaryError(null);
+      })
+      .catch((error) => setSummaryError(getErrorMessage(error, "Failed to load shipment summary.")));
+  }, [filters.isCrossBorder, filters.isPartialShipment, filters.priority, filters.query, filters.status, filters.type]);
 
   const stats = [
-    { label: "Total", value: pagination?.total ?? allShipments.length, color: "#6366f1" },
-    { label: "Processing", value: processing, color: "#f59e0b" },
-    { label: "In Transit", value: inTransit, color: "#3b82f6" },
-    { label: "Delivered", value: delivered, color: "#10b981" },
-    { label: "Failed", value: failed, color: "#ef4444" }
+    { label: "Total", value: summary.totalShipments, color: "#6366f1" },
+    { label: "Processing", value: summary.processingShipments, color: "#f59e0b" },
+    { label: "In Transit", value: summary.inTransitShipments, color: "#3b82f6" },
+    { label: "Delivered", value: summary.deliveredShipments, color: "#10b981" },
+    { label: "Failed", value: summary.failedShipments, color: "#ef4444" }
   ];
 
   return (
@@ -58,6 +85,9 @@ export function ShipmentsListPage() {
           </Grid>
         ))}
       </Grid>
+      {summaryError ? (
+        <Typography sx={{ fontSize: 13, color: "#b91c1c" }}>{summaryError}</Typography>
+      ) : null}
 
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
         <TextField

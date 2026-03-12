@@ -1,18 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Box, Card, CardContent, Chip, Container, Grid, Typography } from "@mui/material";
+import AccountTreeOutlinedIcon from "@mui/icons-material/AccountTreeOutlined";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
+import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
+import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
+import { Alert, Box, Card, CardContent, Chip, Container, Grid, Stack, Typography } from "@mui/material";
 import type { AppDataTableColumnDef } from "@app/components/AppDataTable";
 import { AppDataTable } from "@app/components/AppDataTable";
+import { MetricCard } from "@app/components/MetricCard";
 import { productionApi } from "@features/production/services/production.api.service";
-import type { RoutingSummary } from "@features/production/types/production.types";
-import { getErrorMessage, getPagedItems } from "@shared/utils/asyncThunk.utils";
+import type { RoutingSummary, RoutingMetricsSummary } from "@features/production/types/production.types";
+import { getApiData, getErrorMessage, getPagedItems } from "@shared/utils/asyncThunk.utils";
 
 export function ProductionRoutingsPage() {
   const [routings, setRoutings] = useState<RoutingSummary[]>([]);
+  const [summary, setSummary] = useState<RoutingMetricsSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    void productionApi.listRoutings({ pageNumber: 1, pageSize: 100 })
-      .then((response) => setRoutings(getPagedItems(response)))
+    void Promise.all([productionApi.listRoutings({ pageNumber: 1, pageSize: 100 }), productionApi.getRoutingsSummary()])
+      .then(([routingsResponse, summaryResponse]) => {
+        setRoutings(getPagedItems(routingsResponse));
+        setSummary(getApiData(summaryResponse, null));
+      })
       .catch((loadError) => setError(getErrorMessage(loadError, "Failed to load routings.")));
   }, []);
 
@@ -33,18 +42,47 @@ export function ProductionRoutingsPage() {
     }
   ], []);
 
+  const activeRoutings = summary?.activeRoutings ?? routings.filter((routing) => routing.isActive).length;
+  const defaultRoutings = summary?.defaultRoutings ?? routings.filter((routing) => routing.isDefault).length;
+  const productCoverage = summary?.productCoverage ?? new Set(routings.map((routing) => routing.productId).filter(Boolean)).size;
+
   return (
     <Container maxWidth={false} disableGutters className="space-y-6">
-      <Box>
-        <Typography variant="h4">Routings</Typography>
-        <Typography sx={{ fontSize: 14, color: "#64748b", mt: 0.5 }}>
-          Track the production process blueprints that define work-center flow and sequencing.
-        </Typography>
-      </Box>
+      <Card sx={{ border: "1px solid rgba(148, 163, 184, 0.18)", background: "linear-gradient(135deg, rgba(30,64,175,0.96) 0%, rgba(15,23,42,0.96) 54%, rgba(79,70,229,0.8) 100%)", color: "white" }}>
+        <CardContent sx={{ p: { xs: 2.5, md: 3.5 } }}>
+          <Stack spacing={2}>
+            <Box>
+              <Typography sx={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(191,219,254,0.92)" }}>
+                Process Blueprint
+              </Typography>
+              <Typography variant="h4" sx={{ mt: 0.8, fontWeight: 800 }}>
+                Routings
+              </Typography>
+              <Typography sx={{ fontSize: 14, maxWidth: 760, color: "rgba(226,232,240,0.92)", mt: 1 }}>
+                Track the production process blueprints that define work-center flow and sequencing. The stronger operational signal here is default-routing coverage and how much of the product mix already has a usable routing attached.
+              </Typography>
+            </Box>
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+              <Chip label={`${defaultRoutings} defaults set`} sx={{ bgcolor: "rgba(255,255,255,0.14)", color: "white", fontWeight: 700 }} />
+              <Chip label={`${productCoverage} products covered`} sx={{ bgcolor: "rgba(255,255,255,0.1)", color: "white" }} />
+              <Chip label={`${activeRoutings} active routings`} sx={{ bgcolor: "rgba(255,255,255,0.1)", color: "white" }} />
+            </Stack>
+          </Stack>
+        </CardContent>
+      </Card>
       {error ? <Alert severity="error">{error}</Alert> : null}
       <Grid container spacing={2.5}>
         <Grid size={{ xs: 6, md: 3 }}>
-          <Card><CardContent sx={{ p: 2.5 }}><Typography sx={{ fontSize: 12, color: "#64748b" }}>Routings</Typography><Typography sx={{ fontSize: "1.8rem", fontWeight: 800 }}>{routings.length}</Typography></CardContent></Card>
+          <MetricCard label="Routings" value={summary?.totalRoutings ?? routings.length} icon={<AccountTreeOutlinedIcon sx={{ fontSize: 18 }} />} helpText="Total routing records in the database." />
+        </Grid>
+        <Grid size={{ xs: 6, md: 3 }}>
+          <MetricCard label="Active" value={activeRoutings} tone="#16a34a" icon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />} helpText="Routings ready for active scheduling and execution use." />
+        </Grid>
+        <Grid size={{ xs: 6, md: 3 }}>
+          <MetricCard label="Defaults" value={defaultRoutings} tone="#7c3aed" icon={<StarOutlineOutlinedIcon sx={{ fontSize: 18 }} />} helpText="Products with a primary routing decision already defined." />
+        </Grid>
+        <Grid size={{ xs: 6, md: 3 }}>
+          <MetricCard label="Product Coverage" value={productCoverage} tone="#2563eb" icon={<Inventory2OutlinedIcon sx={{ fontSize: 18 }} />} helpText="Distinct products currently mapped to routing definitions." />
         </Grid>
       </Grid>
       <Card><CardContent sx={{ p: 2 }}><AppDataTable columns={columns} data={routings} emptyState="No routings found." /></CardContent></Card>
