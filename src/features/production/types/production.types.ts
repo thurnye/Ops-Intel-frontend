@@ -108,6 +108,20 @@ export type Machine = {
   isActive: boolean;
 };
 
+export type MachineUpsertPayload = {
+  machineCode: string;
+  name: string;
+  workCenterId: string;
+  model?: string;
+  manufacturer?: string;
+  serialNumber?: string;
+  hourlyRunningCost: number;
+  status: MachineStatus;
+  lastMaintenanceDate?: string;
+  nextMaintenanceDate?: string;
+  isActive: boolean;
+};
+
 /* ── BOM ──────────────────────────────────────────── */
 
 export type BillOfMaterialItem = {
@@ -176,6 +190,18 @@ export type RoutingSummary = {
   isDefault: boolean;
   effectiveFrom: string;
   effectiveTo?: string;
+};
+
+export type RoutingUpsertPayload = {
+  routingCode: string;
+  name: string;
+  productId: string;
+  version: number;
+  isActive: boolean;
+  isDefault: boolean;
+  effectiveFrom: string;
+  effectiveTo?: string;
+  notes?: string;
 };
 
 /* ── Sub-records ──────────────────────────────────── */

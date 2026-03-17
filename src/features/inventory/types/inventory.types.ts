@@ -119,6 +119,11 @@ export type Brand = {
   description?: string;
 };
 
+export type BrandUpsertPayload = {
+  name: string;
+  description?: string;
+};
+
 export type UnitOfMeasure = {
   id: string;
   name: string;
@@ -139,8 +144,36 @@ export type Warehouse = {
   isActive: boolean;
 };
 
+export type WarehouseUpsertPayload = {
+  name: string;
+  code: string;
+  description?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  stateOrProvince?: string;
+  postalCode?: string;
+  country?: string;
+  isActive: boolean;
+};
+
 export type Supplier = {
   id: string;
+  name: string;
+  contactPerson?: string;
+  email?: string;
+  phoneNumber?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  stateOrProvince?: string;
+  postalCode?: string;
+  country?: string;
+  isActive: boolean;
+  notes?: string;
+};
+
+export type SupplierUpsertPayload = {
   name: string;
   contactPerson?: string;
   email?: string;
@@ -234,4 +267,28 @@ export type ProductUpsertPayload = {
   height: number;
   status: ProductStatus;
   thumbnailImageUrl?: string;
+};
+
+export type ProductBulkSaveItemPayload = ProductUpsertPayload & {
+  sourceRowNumber: number;
+  clientRowId?: string;
+};
+
+export type ProductBulkSavePayload = {
+  items: ProductBulkSaveItemPayload[];
+};
+
+export type ProductBulkSaveResult = {
+  sourceRowNumber: number;
+  clientRowId?: string;
+  success: boolean;
+  errorMessage?: string;
+  product?: Product;
+};
+
+export type ProductBulkSaveResponse = {
+  totalRequested: number;
+  successCount: number;
+  failureCount: number;
+  results: ProductBulkSaveResult[];
 };

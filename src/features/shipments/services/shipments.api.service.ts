@@ -10,8 +10,11 @@ import type {
   ShipmentAddress,
   ShipmentUpsertPayload,
   CarrierMetricsSummary,
-  ShipmentAddressMetricsSummary
+  ShipmentAddressMetricsSummary,
+  CarrierUpsertPayload,
+  ShipmentAddressUpsertPayload
 } from "@features/shipments/types/shipments.types";
+import type { BulkCreatePayload, BulkCreateResponse } from "@shared/types/bulk.types";
 
 export const shipmentsApi = {
   /* ── Shipments ─────────────────────────────────── */
@@ -25,6 +28,10 @@ export const shipmentsApi = {
   },
   async createShipment(body: ShipmentUpsertPayload): Promise<ApiResponse<Shipment>> {
     const { data } = await apiClient.post<ApiResponse<Shipment>>("/shipments", body);
+    return data;
+  },
+  async createShipmentsBulk(body: BulkCreatePayload<ShipmentUpsertPayload>): Promise<ApiResponse<BulkCreateResponse<Shipment>>> {
+    const { data } = await apiClient.post<ApiResponse<BulkCreateResponse<Shipment>>>("/shipments/bulk", body);
     return data;
   },
   async updateShipment(id: string, body: ShipmentUpsertPayload): Promise<ApiResponse<Shipment>> {
@@ -59,6 +66,21 @@ export const shipmentsApi = {
     return data;
   },
 
+  async createCarrier(body: CarrierUpsertPayload): Promise<ApiResponse<Carrier>> {
+    const { data } = await apiClient.post<ApiResponse<Carrier>>("/shipment-carriers", body);
+    return data;
+  },
+
+  async createCarriersBulk(body: BulkCreatePayload<CarrierUpsertPayload>): Promise<ApiResponse<BulkCreateResponse<Carrier>>> {
+    const { data } = await apiClient.post<ApiResponse<BulkCreateResponse<Carrier>>>("/shipment-carriers/bulk", body);
+    return data;
+  },
+
+  async updateCarrier(id: string, body: Omit<CarrierUpsertPayload, "carrierCode">): Promise<ApiResponse<Carrier>> {
+    const { data } = await apiClient.put<ApiResponse<Carrier>>(`/shipment-carriers/${id}`, body);
+    return data;
+  },
+
   async getCarriersSummary(params?: { search?: string; isActive?: boolean }): Promise<ApiResponse<CarrierMetricsSummary>> {
     const { data } = await apiClient.get<ApiResponse<CarrierMetricsSummary>>("/shipment-carriers/summary", { params });
     return data;
@@ -71,6 +93,21 @@ export const shipmentsApi = {
 
   async searchAddresses(params?: { search?: string; country?: string; city?: string; take?: number }): Promise<ApiResponse<ShipmentAddress[]>> {
     const { data } = await apiClient.get<ApiResponse<ShipmentAddress[]>>("/shipment-addresses/search", { params });
+    return data;
+  },
+
+  async createAddress(body: ShipmentAddressUpsertPayload): Promise<ApiResponse<ShipmentAddress>> {
+    const { data } = await apiClient.post<ApiResponse<ShipmentAddress>>("/shipment-addresses", body);
+    return data;
+  },
+
+  async createAddressesBulk(body: BulkCreatePayload<ShipmentAddressUpsertPayload>): Promise<ApiResponse<BulkCreateResponse<ShipmentAddress>>> {
+    const { data } = await apiClient.post<ApiResponse<BulkCreateResponse<ShipmentAddress>>>("/shipment-addresses/bulk", body);
+    return data;
+  },
+
+  async updateAddress(id: string, body: ShipmentAddressUpsertPayload): Promise<ApiResponse<ShipmentAddress>> {
+    const { data } = await apiClient.put<ApiResponse<ShipmentAddress>>(`/shipment-addresses/${id}`, body);
     return data;
   },
 

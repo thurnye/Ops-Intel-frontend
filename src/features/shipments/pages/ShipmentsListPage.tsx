@@ -68,9 +68,14 @@ export function ShipmentsListPage() {
           <Typography variant="h4">Shipments</Typography>
           <Typography sx={{ fontSize: 14, color: "#64748b", mt: 0.5 }}>Track outbound fulfillment, packages, and delivery status</Typography>
         </Box>
-        <Button component={RouterLink} to="/shipments/new" variant="contained" startIcon={<AddIcon />}>
-          Create Shipment
-        </Button>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25}>
+          <Button component={RouterLink} to="/shipments/records/bulk-import" variant="outlined">
+            Bulk Import Shipments
+          </Button>
+          <Button component={RouterLink} to="/shipments/new" variant="contained" startIcon={<AddIcon />}>
+            Create Shipment
+          </Button>
+        </Stack>
       </Stack>
 
       <Grid container spacing={2.5}>

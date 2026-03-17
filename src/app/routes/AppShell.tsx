@@ -29,6 +29,7 @@ import PeopleOutlineOutlinedIcon from "@mui/icons-material/PeopleOutlineOutlined
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import FiberManualRecordRoundedIcon from "@mui/icons-material/FiberManualRecordRounded";
+import HelpCenterOutlinedIcon from "@mui/icons-material/HelpCenterOutlined";
 import { useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@features/auth/hooks/useAuth";
@@ -114,6 +115,12 @@ const navSections: NavSection[] = [
       { label: "Reports", to: "/reports", icon: <AssessmentOutlinedIcon fontSize="small" /> },
       { label: "Analytics", to: "/analytics", icon: <InsightsOutlinedIcon fontSize="small" /> },
       { label: "Alerts", to: "/alerts", icon: <NotificationsActiveOutlinedIcon fontSize="small" /> }
+    ]
+  },
+  {
+    group: "Support",
+    items: [
+      { label: "Documentation", to: "/documentation", icon: <HelpCenterOutlinedIcon fontSize="small" /> }
     ]
   },
   {

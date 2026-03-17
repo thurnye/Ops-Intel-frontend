@@ -6,6 +6,7 @@ import {
   Button,
   InputAdornment,
   LinearProgress,
+  Menu,
   MenuItem,
   Select,
   Stack,
@@ -15,6 +16,7 @@ import {
 } from "@mui/material";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import AddIcon from "@mui/icons-material/Add";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { useEffect, useMemo, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import type { AppDataTableColumnDef } from "@app/components/AppDataTable";
@@ -32,6 +34,7 @@ import { getApiData, getErrorMessage } from "@shared/utils/asyncThunk.utils";
 export function InventoryOverviewPage() {
   const dispatch = useAppDispatch();
   const { products, filters, page, pageSize, pagination, loading, categories, warehouses } = useInventory();
+  const [createAnchorEl, setCreateAnchorEl] = useState<null | HTMLElement>(null);
   const [summary, setSummary] = useState({
     totalProducts: 0,
     activeProducts: 0,
@@ -148,9 +151,28 @@ export function InventoryOverviewPage() {
           </Typography>
         </Box>
         <Stack direction="row" spacing={1.5}>
-          <Button component={RouterLink} to="/inventory/new" variant="contained" startIcon={<AddIcon />}>
-            Create Product
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            endIcon={<ArrowDropDownIcon />}
+            onClick={(event) => setCreateAnchorEl(event.currentTarget)}
+          >
+            Add Product
           </Button>
+          <Menu
+            anchorEl={createAnchorEl}
+            open={Boolean(createAnchorEl)}
+            onClose={() => setCreateAnchorEl(null)}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+          >
+            <MenuItem component={RouterLink} to="/inventory/new" onClick={() => setCreateAnchorEl(null)}>
+              Add Single Product
+            </MenuItem>
+            <MenuItem component={RouterLink} to="/inventory/bulk-import" onClick={() => setCreateAnchorEl(null)}>
+              Add Bulk Product
+            </MenuItem>
+          </Menu>
           <RouterLink
             className="inline-flex items-center gap-1 self-center text-sm font-medium text-indigo-600 no-underline transition-colors hover:text-indigo-800"
             to="/inventory/movements"

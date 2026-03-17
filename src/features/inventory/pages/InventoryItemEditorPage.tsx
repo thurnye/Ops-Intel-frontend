@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import {
@@ -19,65 +18,12 @@ import { Link as RouterLink, useNavigate, useParams } from "react-router-dom";
 import { RHFSelectField } from "@app/components/forms/RHFSelectField";
 import { RHFSwitchField } from "@app/components/forms/RHFSwitchField";
 import { RHFTextField } from "@app/components/forms/RHFTextField";
+import { productFormDefaultValues, productFormSchema, type ProductFormValues } from "@features/inventory/config/productForm.config";
 import { inventoryApi } from "@features/inventory/services/inventory.api.service";
 import { ProductStatus, type Brand, type Category, type Product, type ProductUpsertPayload, type UnitOfMeasure } from "@features/inventory/types/inventory.types";
 import { getApiData, getErrorMessage } from "@shared/utils/asyncThunk.utils";
 
-const schema = z.object({
-  name: z.string().min(1).max(200),
-  description: z.string().optional(),
-  sku: z.string().min(1).max(100),
-  barcode: z.string().optional(),
-  categoryId: z.string().min(1, "Category is required."),
-  brandId: z.string().optional(),
-  unitOfMeasureId: z.string().min(1, "Unit of measure is required."),
-  costPrice: z.coerce.number().min(0),
-  sellingPrice: z.coerce.number().min(0),
-  taxRate: z.coerce.number().min(0),
-  reorderLevel: z.coerce.number().min(0),
-  reorderQuantity: z.coerce.number().min(0),
-  trackInventory: z.boolean(),
-  allowBackOrder: z.boolean(),
-  isSerialized: z.boolean(),
-  isBatchTracked: z.boolean(),
-  isPerishable: z.boolean(),
-  weight: z.coerce.number().min(0),
-  length: z.coerce.number().min(0),
-  width: z.coerce.number().min(0),
-  height: z.coerce.number().min(0),
-  status: z.coerce.number().int().min(1),
-  thumbnailImageUrl: z.string().optional()
-});
-
-type FormValues = z.infer<typeof schema>;
-
-const defaultValues: FormValues = {
-  name: "",
-  description: "",
-  sku: "",
-  barcode: "",
-  categoryId: "",
-  brandId: "",
-  unitOfMeasureId: "",
-  costPrice: 0,
-  sellingPrice: 0,
-  taxRate: 0,
-  reorderLevel: 0,
-  reorderQuantity: 0,
-  trackInventory: true,
-  allowBackOrder: false,
-  isSerialized: false,
-  isBatchTracked: false,
-  isPerishable: false,
-  weight: 0,
-  length: 0,
-  width: 0,
-  height: 0,
-  status: ProductStatus.Active,
-  thumbnailImageUrl: ""
-};
-
-function toFormValues(product: Product): FormValues {
+function toFormValues(product: Product): ProductFormValues {
   return {
     name: product.name,
     description: product.description ?? "",
@@ -117,8 +63,8 @@ export function InventoryItemEditorPage() {
   const [units, setUnits] = useState<UnitOfMeasure[]>([]);
 
   const form = useForm<any>({
-    resolver: zodResolver(schema),
-    defaultValues
+    resolver: zodResolver(productFormSchema),
+    defaultValues: productFormDefaultValues
   });
 
   const { control, handleSubmit, reset } = form;
@@ -166,7 +112,7 @@ export function InventoryItemEditorPage() {
     };
   }, [isEdit, itemId, reset]);
 
-  async function onSubmit(values: FormValues) {
+  async function onSubmit(values: ProductFormValues) {
     try {
       setSaving(true);
       setError(null);
@@ -302,7 +248,7 @@ export function InventoryItemEditorPage() {
             <Button type="submit" variant="contained" disabled={saving}>
               {saving ? "Saving..." : isEdit ? "Save Changes" : "Create Product"}
             </Button>
-            <Button variant="outlined" onClick={() => reset(defaultValues)} disabled={saving || isEdit}>Reset</Button>
+            <Button variant="outlined" onClick={() => reset(productFormDefaultValues)} disabled={saving || isEdit}>Reset</Button>
           </Stack>
         </Stack>
       </form>

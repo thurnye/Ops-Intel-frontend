@@ -1,6 +1,7 @@
 import { apiClient } from "@shared/services/apiClient.service";
 import type { ApiResponse } from "@shared/types/api.types";
 import type { CreateOrderPayload, OrderListItem, OrderDetail, UpdateOrderPayload, OrderCustomerMetricsSummary, OrderOverviewMetricsSummary } from "@features/orders/types/orders.types";
+import type { BulkCreatePayload, BulkCreateResponse } from "@shared/types/bulk.types";
 
 export const ordersApi = {
   async listOrders(params?: { pageNumber?: number; pageSize?: number; searchTerm?: string; status?: number; orderType?: number; warehouseId?: string }): Promise<ApiResponse<OrderListItem[]>> {
@@ -30,6 +31,11 @@ export const ordersApi = {
 
   async createOrder(body: CreateOrderPayload): Promise<ApiResponse<OrderDetail>> {
     const { data } = await apiClient.post<ApiResponse<OrderDetail>>("/orders", body);
+    return data;
+  },
+
+  async createOrdersBulk(body: BulkCreatePayload<CreateOrderPayload>): Promise<ApiResponse<BulkCreateResponse<OrderDetail>>> {
+    const { data } = await apiClient.post<ApiResponse<BulkCreateResponse<OrderDetail>>>("/orders/bulk", body);
     return data;
   },
 

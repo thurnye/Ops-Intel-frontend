@@ -1,18 +1,410 @@
-import type { ActivityItem, AlertSummary, KpiCardData } from "@features/dashboard/types/dashboard.types";
+import type { DashboardOverviewData } from "@features/dashboard/types/dashboard.types";
 
-export const dashboardKpis: KpiCardData[] = [
-  { id: "k1", label: "Open Orders", value: "248", delta: "+12", direction: "up" },
-  { id: "k2", label: "In Production", value: "67", delta: "+4", direction: "up" },
-  { id: "k3", label: "Delayed Orders", value: "14", delta: "-3", direction: "down" },
-  { id: "k4", label: "Utilization", value: "82%", delta: "+1.2%", direction: "up" }
-];
-
-export const dashboardAlerts: AlertSummary[] = [
-  { id: "a1", title: "Low stock: ALU-6061-BAR", severity: "high" },
-  { id: "a2", title: "Order SO-1123 delayed 2h", severity: "medium" }
-];
-
-export const dashboardActivity: ActivityItem[] = [
-  { id: "e1", message: "Job WO-443 moved to quality check", happenedAt: "5m ago" },
-  { id: "e2", message: "Shipment SH-220 marked dispatched", happenedAt: "16m ago" }
-];
+export const dashboardOverviewMock: DashboardOverviewData = {
+  header: {
+    title: "Dashboard",
+    subtitle:
+      "Monitor operations, finances, inventory, production, and shipment performance in one place.",
+    rangeOptions: [
+      { value: "7d", label: "Last 7 days" },
+      { value: "30d", label: "Last 30 days" },
+      { value: "90d", label: "Last 90 days" },
+      { value: "1y", label: "Last 12 months" },
+    ],
+    siteOptions: [
+      { value: "all", label: "All Sites" },
+      { value: "toronto", label: "Toronto DC" },
+      { value: "vaughan", label: "Vaughan Hub" },
+      { value: "hamilton", label: "Hamilton Central" },
+    ],
+    refreshLabel: "Refresh",
+    exportLabel: "Export",
+  },
+  analyticsHeader: {
+    title: "Operational Analytics",
+    subtitle: "Visual insights across inventory, production, shipment, and finance.",
+  },
+  kpis: [
+    {
+      id: "revenue",
+      title: "Total Revenue",
+      value: "$2.48M",
+      change: "+12.4%",
+      subtext: "vs last month",
+      iconKey: "currency",
+      color: "#2563eb",
+      direction: "up",
+    },
+    {
+      id: "orders",
+      title: "Orders in Progress",
+      value: "1,284",
+      change: "+8.1%",
+      subtext: "83 awaiting fulfillment",
+      iconKey: "orders",
+      color: "#7c3aed",
+      direction: "up",
+    },
+    {
+      id: "production",
+      title: "Production Efficiency",
+      value: "91.8%",
+      change: "+2.1%",
+      subtext: "this week",
+      iconKey: "production",
+      color: "#f59e0b",
+      direction: "up",
+    },
+    {
+      id: "inventory",
+      title: "Inventory Value",
+      value: "$864K",
+      change: "+4.7%",
+      subtext: "12 low-stock SKUs",
+      iconKey: "inventory",
+      color: "#14b8a6",
+      direction: "up",
+    },
+    {
+      id: "shipments",
+      title: "Shipments Pending",
+      value: "146",
+      change: "+5.3%",
+      subtext: "17 delayed",
+      iconKey: "shipments",
+      color: "#ef4444",
+      direction: "up",
+    },
+    {
+      id: "alerts",
+      title: "Critical Alerts",
+      value: "9",
+      change: "+1.2%",
+      subtext: "needs review",
+      iconKey: "alerts",
+      color: "#f97316",
+      direction: "up",
+    },
+  ],
+  businessPerformance: {
+    title: "Business Performance Overview",
+    metricChips: ["Revenue", "Orders", "Shipments"],
+    revenueTrendTitle: "Monthly Revenue Trend",
+    revenueTrend: {
+      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+      series: [{ label: "Revenue (CAD '000)", data: [180, 210, 240, 220, 280, 320, 310, 360, 390, 410, 450, 480] }],
+    },
+    progressCards: [
+      {
+        id: "on-time",
+        title: "On-Time Shipment Rate",
+        value: "94.2%",
+        progress: 94.2,
+        color: "primary",
+      },
+      {
+        id: "capacity",
+        title: "Warehouse Capacity Use",
+        value: "81%",
+        progress: 81,
+        color: "warning",
+      },
+      {
+        id: "approvals",
+        title: "Approval Queue",
+        value: "14",
+        progress: 14,
+        description: "4 urgent purchase approvals pending finance signoff.",
+        color: "info",
+      },
+    ],
+  },
+  attentionRequired: {
+    title: "Attention Required",
+    alerts: [
+      {
+        id: 1,
+        title: "12 items below reorder level",
+        detail: "Inventory replenishment required across 3 warehouses.",
+        severity: "Critical",
+      },
+      {
+        id: 2,
+        title: "7 shipments at risk",
+        detail: "Carrier delays detected in the East corridor.",
+        severity: "Warning",
+      },
+      {
+        id: 3,
+        title: "4 approvals pending",
+        detail: "Purchase requisitions awaiting finance review.",
+        severity: "Info",
+      },
+      {
+        id: 4,
+        title: "2 production lines under target",
+        detail: "Throughput below expected benchmark today.",
+        severity: "Warning",
+      },
+    ],
+    quickActionsTitle: "Quick Actions",
+    quickActions: [
+      { id: "create-order", label: "Create Order", iconKey: "task", variant: "contained" },
+      { id: "new-po", label: "New PO", iconKey: "shopping", variant: "outlined" },
+      { id: "add-inventory", label: "Add Inventory", iconKey: "warehouse", variant: "outlined" },
+      { id: "schedule-shipment", label: "Schedule Shipment", iconKey: "shipments", variant: "outlined" },
+    ],
+  },
+  finance: {
+    sectionTitle: "Finance Analytics",
+    revenueExpenseTitle: "Revenue vs Expense Trend",
+    expenseBreakdownTitle: "Expense Breakdown",
+    revenueExpenseTrend: {
+      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      series: [
+        { label: "Revenue", data: [420, 470, 510, 560, 600, 655] },
+        { label: "Expenses", data: [310, 330, 355, 380, 405, 430] },
+        { label: "Net Cashflow", data: [110, 140, 155, 180, 195, 225] },
+      ],
+    },
+    expenseBreakdown: [
+      { id: 0, value: 34, label: "Production Cost" },
+      { id: 1, value: 22, label: "Logistics" },
+      { id: 2, value: 18, label: "Payroll" },
+      { id: 3, value: 14, label: "Procurement" },
+      { id: 4, value: 12, label: "Admin" },
+    ],
+  },
+  moduleHealth: {
+    cards: [
+      {
+        id: "inventory",
+        title: "Inventory",
+        value: "24,892 units",
+        status: "Healthy",
+        note: "12 low-stock items across 3 warehouses. Reorder cycle stable.",
+        iconKey: "inventory",
+        color: "#14b8a6",
+      },
+      {
+        id: "production",
+        title: "Production",
+        value: "58 active jobs",
+        status: "Healthy",
+        note: "2 lines below target, but overall output remains within SLA.",
+        iconKey: "production",
+        color: "#f59e0b",
+      },
+      {
+        id: "shipment",
+        title: "Shipment",
+        value: "146 pending",
+        status: "Needs Review",
+        note: "17 delayed shipments require route and carrier attention.",
+        iconKey: "shipments",
+        color: "#ef4444",
+      },
+      {
+        id: "finance",
+        title: "Finance",
+        value: "$412K receivables",
+        status: "Healthy",
+        note: "Collections are on track with 94% invoice completion this month.",
+        iconKey: "check",
+        color: "#2563eb",
+      },
+    ],
+  },
+  inventory: {
+    sectionTitle: "Inventory Analytics",
+    lowStockTitle: "Top Low-Stock Items",
+    lowStockChart: {
+      labels: ["Servo Motor", "Hydraulic Coupling", "Industrial Bearings", "Safety Gloves", "Tape Roll"],
+      series: [{ label: "Available Units", data: [8, 18, 14, 42, 31] }],
+      layout: "horizontal",
+    },
+    inflowOutflowTitle: "Inventory Inflow vs Outflow",
+    inflowOutflowChart: {
+      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      series: [
+        { label: "Inflow", data: [420, 460, 510, 495, 540, 575] },
+        { label: "Outflow", data: [390, 430, 470, 485, 500, 545] },
+      ],
+    },
+    warehouseCompositionTitle: "Warehouse Stock Composition",
+    warehouseCompositionChart: {
+      labels: ["Toronto DC", "Vaughan Hub", "Hamilton Central", "Ottawa South"],
+      series: [
+        { label: "Raw Materials", data: [220, 180, 140, 120], stack: "stock" },
+        { label: "Finished Goods", data: [160, 145, 110, 95], stack: "stock" },
+        { label: "Packaging", data: [80, 60, 55, 40], stack: "stock" },
+      ],
+    },
+    inventoryMixTitle: "Inventory Mix by Category",
+    inventoryMix: [
+      { id: 0, value: 38, label: "Raw Materials" },
+      { id: 1, value: 24, label: "Finished Goods" },
+      { id: 2, value: 18, label: "Packaging" },
+      { id: 3, value: 12, label: "WIP" },
+      { id: 4, value: 8, label: "MRO Supplies" },
+    ],
+  },
+  production: {
+    sectionTitle: "Production Analytics",
+    efficiencyTitle: "Production Line Efficiency Comparison",
+    efficiencyChart: {
+      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      series: [
+        { label: "Line A", data: [40, 40, 10, 95, 50, 55] },
+        { label: "Line B", data: [20, 60, 50, 45, 40, 75] },
+        { label: "Line C", data: [30, 30, 40, 85, 50, 45] },
+        { label: "Line D", data: [90, 40, 70, 45, 50, 55] },
+        { label: "Line E", data: [34, 35, 65, 63, 74, 35] },
+        { label: "Line F", data: [24, 23, 54, 86, 58, 93] },
+      ],
+    },
+    statusMixTitle: "Production Job Status Mix",
+    statusMix: [
+      { id: 0, value: 52, label: "Completed" },
+      { id: 1, value: 23, label: "In Progress" },
+      { id: 2, value: 11, label: "Queued" },
+      { id: 3, value: 6, label: "Delayed" },
+    ],
+    plannedVsActualTitle: "Planned vs Actual Production Output",
+    plannedVsActualChart: {
+      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      series: [
+        { label: "Planned Output", data: [820, 860, 910, 940, 980, 1020] },
+        { label: "Actual Output", data: [790, 845, 895, 910, 960, 990] },
+      ],
+    },
+  },
+  shipments: {
+    sectionTitle: "Shipment Analytics",
+    onTimeVsDelayedTitle: "On-Time vs Delayed Shipment Trend",
+    onTimeVsDelayedChart: {
+      labels: ["W1", "W2", "W3", "W4", "W5", "W6"],
+      series: [
+        { label: "On-Time %", data: [82, 86, 88, 84, 91, 93] },
+        { label: "Delayed %", data: [12, 10, 9, 13, 7, 6] },
+      ],
+    },
+    statusDistributionTitle: "Shipment Status Distribution",
+    statusDistribution: [
+      { id: 0, value: 61, label: "Delivered" },
+      { id: 1, value: 21, label: "In Transit" },
+      { id: 2, value: 10, label: "Pending" },
+      { id: 3, value: 8, label: "Delayed" },
+    ],
+    weeklyOrdersVsShipmentsTitle: "Weekly Orders vs Shipments",
+    weeklyOrdersVsShipmentsChart: {
+      labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      series: [
+        { label: "Orders", data: [120, 180, 160, 210, 240, 280, 260] },
+        { label: "Shipments", data: [90, 120, 135, 150, 175, 190, 210] },
+      ],
+    },
+    teamTaskCompletionTitle: "Team Task Completion",
+    teamTaskCompletion: [
+      { label: "Procurement", value: 82 },
+      { label: "Warehouse", value: 75 },
+      { label: "Production", value: 91 },
+      { label: "Finance", value: 68 },
+      { label: "Operations", value: 88 },
+    ],
+    inventoryMixTitle: "Inventory Mix",
+    inventoryMix: [
+      { id: 0, value: 52, label: "Raw Materials" },
+      { id: 1, value: 21, label: "Finished Goods" },
+      { id: 2, value: 15, label: "Packaging" },
+      { id: 3, value: 12, label: "Maintenance" },
+    ],
+  },
+  summarySnapshots: [
+    {
+      id: "workforce",
+      title: "Workforce Snapshot",
+      iconKey: "groups",
+      accentTone: "info",
+      primaryLabel: "Active Staff",
+      primaryValue: "284",
+      stats: [
+        { label: "Shift coverage", value: "97%" },
+        { label: "Open positions", value: "6" },
+      ],
+    },
+    {
+      id: "procurement",
+      title: "Procurement Summary",
+      iconKey: "shopping",
+      accentTone: "warning",
+      primaryLabel: "Open Purchase Orders",
+      primaryValue: "42",
+      stats: [
+        { label: "Awaiting approval", value: "9" },
+        { label: "Supplier SLA met", value: "92%" },
+      ],
+    },
+    {
+      id: "warehouse",
+      title: "Warehouse Summary",
+      iconKey: "warehouse",
+      accentTone: "success",
+      primaryLabel: "Warehouses Active",
+      primaryValue: "15",
+      stats: [
+        { label: "Avg. pick accuracy", value: "98.4%" },
+        { label: "Cross-dock utilization", value: "76%" },
+      ],
+    },
+  ],
+  workflow: {
+    title: "Workflow Pipeline",
+    steps: [
+      { label: "Quotation", count: 74, progress: 85, color: "#3b82f6" },
+      { label: "Sales Order", count: 132, progress: 72, color: "#8b5cf6" },
+      { label: "Production", count: 58, progress: 64, color: "#f59e0b" },
+      { label: "Quality Check", count: 41, progress: 78, color: "#14b8a6" },
+      { label: "Packaging", count: 33, progress: 66, color: "#22c55e" },
+      { label: "Shipment", count: 27, progress: 59, color: "#ef4444" },
+      { label: "Invoice", count: 89, progress: 81, color: "#6366f1" },
+    ],
+  },
+  activityFeed: {
+    title: "Live Activity Feed",
+    items: [
+      { id: 1, text: "PO-2204 approved by Operations Manager", time: "5 min ago", color: "#22c55e" },
+      { id: 2, text: "Shipment SH-904 marked in transit", time: "12 min ago", color: "#3b82f6" },
+      { id: 3, text: "Inventory count adjusted in Toronto DC", time: "27 min ago", color: "#f59e0b" },
+      { id: 4, text: "Production Batch PB-118 started", time: "41 min ago", color: "#8b5cf6" },
+      { id: 5, text: "Invoice INV-781 paid by Nova Manufacturing", time: "1 hr ago", color: "#14b8a6" },
+    ],
+    insight: {
+      title: "AI Insight",
+      message: "Risk of inventory shortage detected for Servo Motor Unit in Vaughan Hub within 4 days.",
+      iconKey: "task",
+    },
+  },
+  tables: {
+    recentOrdersTitle: "Recent Orders",
+    lowStockItemsTitle: "Low Stock Items",
+    recentOrders: [
+      { orderNo: "SO-10482", customer: "Nova Manufacturing", module: "Sales", amount: 12450, status: "Completed", dueDate: "2026-03-16", warehouse: "Toronto DC" },
+      { orderNo: "SO-10483", customer: "Vertex Industrial", module: "Production", amount: 8860, status: "In Progress", dueDate: "2026-03-18", warehouse: "Vaughan Hub" },
+      { orderNo: "SO-10484", customer: "Delta Retail", module: "Shipment", amount: 14220, status: "Delayed", dueDate: "2026-03-15", warehouse: "Mississauga West" },
+      { orderNo: "SO-10485", customer: "Acme Distribution", module: "Procurement", amount: 6390, status: "Pending", dueDate: "2026-03-20", warehouse: "Ottawa South" },
+      { orderNo: "SO-10486", customer: "Prime Works", module: "Sales", amount: 19650, status: "Completed", dueDate: "2026-03-14", warehouse: "Toronto DC" },
+      { orderNo: "SO-10487", customer: "Northline Logistics", module: "Shipment", amount: 9350, status: "In Progress", dueDate: "2026-03-19", warehouse: "Hamilton Central" },
+      { orderNo: "SO-10488", customer: "Crest Engineering", module: "Production", amount: 11320, status: "Pending", dueDate: "2026-03-21", warehouse: "Vaughan Hub" },
+      { orderNo: "SO-10489", customer: "Urban Build Co.", module: "Sales", amount: 15380, status: "Delayed", dueDate: "2026-03-17", warehouse: "Toronto DC" },
+    ],
+    lowStockItems: [
+      { sku: "INV-2001", item: "Hydraulic Coupling", warehouse: "Toronto DC", stock: 18, reorderLevel: 40, status: "Critical" },
+      { sku: "INV-2002", item: "Safety Gloves Pack", warehouse: "Hamilton Central", stock: 42, reorderLevel: 60, status: "Low" },
+      { sku: "INV-2003", item: "Packaging Tape Roll", warehouse: "Ottawa South", stock: 31, reorderLevel: 50, status: "Low" },
+      { sku: "INV-2004", item: "Servo Motor Unit", warehouse: "Vaughan Hub", stock: 8, reorderLevel: 25, status: "Critical" },
+      { sku: "INV-2005", item: "PLC Sensor Module", warehouse: "Mississauga West", stock: 54, reorderLevel: 50, status: "Healthy" },
+      { sku: "INV-2006", item: "Industrial Bearings", warehouse: "Toronto DC", stock: 14, reorderLevel: 35, status: "Critical" },
+    ],
+  },
+};

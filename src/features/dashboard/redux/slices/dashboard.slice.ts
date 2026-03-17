@@ -1,19 +1,19 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { ActivityItem, AlertSummary, KpiCardData } from "@features/dashboard/types/dashboard.types";
-import { dashboardActivity, dashboardAlerts, dashboardKpis } from "@features/dashboard/mock/dashboard.mock";
+import { dashboardOverviewMock } from "@features/dashboard/mock/dashboard.mock";
+import type { DashboardOverviewData } from "@features/dashboard/types/dashboard.types";
 
 type DashboardState = {
-  kpis: KpiCardData[];
-  alerts: AlertSummary[];
-  recentActivity: ActivityItem[];
+  overview: DashboardOverviewData;
+  selectedRange: string;
+  selectedSite: string;
   loading: boolean;
   error: string | null;
 };
 
 const initialState: DashboardState = {
-  kpis: dashboardKpis,
-  alerts: dashboardAlerts,
-  recentActivity: dashboardActivity,
+  overview: dashboardOverviewMock,
+  selectedRange: "30d",
+  selectedSite: "all",
   loading: false,
   error: null
 };
@@ -22,17 +22,17 @@ const dashboardSlice = createSlice({
   name: "dashboard",
   initialState,
   reducers: {
-    setKpis(state, action: PayloadAction<KpiCardData[]>) {
-      state.kpis = action.payload;
+    setDashboardOverview(state, action: PayloadAction<DashboardOverviewData>) {
+      state.overview = action.payload;
     },
-    setAlerts(state, action: PayloadAction<AlertSummary[]>) {
-      state.alerts = action.payload;
+    setSelectedRange(state, action: PayloadAction<string>) {
+      state.selectedRange = action.payload;
     },
-    setActivity(state, action: PayloadAction<ActivityItem[]>) {
-      state.recentActivity = action.payload;
+    setSelectedSite(state, action: PayloadAction<string>) {
+      state.selectedSite = action.payload;
     }
   }
 });
 
-export const { setKpis, setAlerts, setActivity } = dashboardSlice.actions;
+export const { setDashboardOverview, setSelectedRange, setSelectedSite } = dashboardSlice.actions;
 export default dashboardSlice.reducer;

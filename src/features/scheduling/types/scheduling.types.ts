@@ -428,6 +428,18 @@ export type Shift = {
   breakMinutes: number;
 };
 
+export type ShiftUpsertPayload = {
+  warehouseId: string;
+  workCenterId?: string;
+  shiftCode: string;
+  shiftName: string;
+  startTime: string;
+  endTime: string;
+  crossesMidnight: boolean;
+  capacityMinutes: number;
+  breakMinutes: number;
+};
+
 /* ── Resource Calendar ───────────────────────────── */
 
 export type ResourceCalendarException = {

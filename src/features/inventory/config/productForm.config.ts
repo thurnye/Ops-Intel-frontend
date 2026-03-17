@@ -1,0 +1,108 @@
+import { z } from "zod";
+import { ProductStatus } from "@features/inventory/types/inventory.types";
+
+export const productFormSchema = z.object({
+  name: z.string().min(1).max(200),
+  description: z.string().optional(),
+  sku: z.string().min(1).max(100),
+  barcode: z.string().optional(),
+  categoryId: z.string().min(1, "Category is required."),
+  brandId: z.string().optional(),
+  unitOfMeasureId: z.string().min(1, "Unit of measure is required."),
+  costPrice: z.coerce.number().min(0),
+  sellingPrice: z.coerce.number().min(0),
+  taxRate: z.coerce.number().min(0),
+  reorderLevel: z.coerce.number().min(0),
+  reorderQuantity: z.coerce.number().min(0),
+  trackInventory: z.boolean(),
+  allowBackOrder: z.boolean(),
+  isSerialized: z.boolean(),
+  isBatchTracked: z.boolean(),
+  isPerishable: z.boolean(),
+  weight: z.coerce.number().min(0),
+  length: z.coerce.number().min(0),
+  width: z.coerce.number().min(0),
+  height: z.coerce.number().min(0),
+  status: z.coerce.number().int().min(1),
+  thumbnailImageUrl: z.string().optional()
+});
+
+export type ProductFormValues = z.infer<typeof productFormSchema>;
+
+export const productFormDefaultValues: ProductFormValues = {
+  name: "",
+  description: "",
+  sku: "",
+  barcode: "",
+  categoryId: "",
+  brandId: "",
+  unitOfMeasureId: "",
+  costPrice: 0,
+  sellingPrice: 0,
+  taxRate: 0,
+  reorderLevel: 0,
+  reorderQuantity: 0,
+  trackInventory: true,
+  allowBackOrder: false,
+  isSerialized: false,
+  isBatchTracked: false,
+  isPerishable: false,
+  weight: 0,
+  length: 0,
+  width: 0,
+  height: 0,
+  status: ProductStatus.Active,
+  thumbnailImageUrl: ""
+};
+
+export const productImportFieldOrder: Array<keyof ProductFormValues> = [
+  "name",
+  "description",
+  "sku",
+  "barcode",
+  "categoryId",
+  "brandId",
+  "unitOfMeasureId",
+  "costPrice",
+  "sellingPrice",
+  "taxRate",
+  "reorderLevel",
+  "reorderQuantity",
+  "trackInventory",
+  "allowBackOrder",
+  "isSerialized",
+  "isBatchTracked",
+  "isPerishable",
+  "weight",
+  "length",
+  "width",
+  "height",
+  "status",
+  "thumbnailImageUrl"
+];
+
+export const productImportFieldLabels: Record<keyof ProductFormValues, string> = {
+  name: "Name",
+  description: "Description",
+  sku: "SKU",
+  barcode: "Barcode",
+  categoryId: "Category",
+  brandId: "Brand",
+  unitOfMeasureId: "Unit",
+  costPrice: "Cost Price",
+  sellingPrice: "Selling Price",
+  taxRate: "Tax Rate",
+  reorderLevel: "Reorder Level",
+  reorderQuantity: "Reorder Quantity",
+  trackInventory: "Track Inventory",
+  allowBackOrder: "Allow Back Order",
+  isSerialized: "Serialized",
+  isBatchTracked: "Batch Tracked",
+  isPerishable: "Perishable",
+  weight: "Weight",
+  length: "Length",
+  width: "Width",
+  height: "Height",
+  status: "Status",
+  thumbnailImageUrl: "Thumbnail URL"
+};

@@ -14,6 +14,7 @@ const ShipmentsRoutes = lazy(() => import("@features/shipments/router/ShipmentsR
 const ReportsRoutes = lazy(() => import("@features/reports/router/ReportsRoutes").then((module) => ({ default: module.ReportsRoutes })));
 const AnalyticsRoutes = lazy(() => import("@features/analytics/router/AnalyticsRoutes").then((module) => ({ default: module.AnalyticsRoutes })));
 const AlertsRoutes = lazy(() => import("@features/alerts/router/AlertsRoutes").then((module) => ({ default: module.AlertsRoutes })));
+const DocumentationRoutes = lazy(() => import("@features/documentation/router/DocumentationRoutes").then((module) => ({ default: module.DocumentationRoutes })));
 const UsersRoutes = lazy(() => import("@features/users/router/UsersRoutes").then((module) => ({ default: module.UsersRoutes })));
 const SettingsRoutes = lazy(() => import("@features/settings/router/SettingsRoutes").then((module) => ({ default: module.SettingsRoutes })));
 
@@ -40,6 +41,7 @@ export function AppRouter() {
           <Route path="/reports/*" element={renderRoute(<ReportsRoutes />)} />
           <Route path="/analytics/*" element={renderRoute(<AnalyticsRoutes />)} />
           <Route path="/alerts/*" element={renderRoute(<AlertsRoutes />)} />
+          <Route path="/documentation/*" element={renderRoute(<DocumentationRoutes />)} />
           <Route path="/users/*" element={renderRoute(<UsersRoutes />)} />
           <Route path="/settings/*" element={renderRoute(<SettingsRoutes />)} />
         </Route>

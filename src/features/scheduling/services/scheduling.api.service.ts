@@ -19,8 +19,12 @@ import type {
   ScheduleStatusHistory,
   ScheduleAuditLog,
   ShiftMetricsSummary,
-  DispatchMetricsSummary
+  DispatchMetricsSummary,
+  ShiftUpsertPayload,
+  SchedulePlanUpsertPayload,
+  ScheduleJobUpsertPayload
 } from "@features/scheduling/types/scheduling.types";
+import type { BulkCreatePayload, BulkCreateResponse } from "@shared/types/bulk.types";
 
 export const schedulingApi = {
   /* ── Schedule Plans ────────────────────────────── */
@@ -32,11 +36,15 @@ export const schedulingApi = {
     const { data } = await apiClient.get<ApiResponse<SchedulePlanDetail>>(`/scheduling/plans/${id}`);
     return data;
   },
-  async createPlan(body: import("@features/scheduling/types/scheduling.types").SchedulePlanUpsertPayload): Promise<ApiResponse<SchedulePlanDetail>> {
+  async createPlan(body: SchedulePlanUpsertPayload): Promise<ApiResponse<SchedulePlanDetail>> {
     const { data } = await apiClient.post<ApiResponse<SchedulePlanDetail>>("/scheduling/plans", body);
     return data;
   },
-  async updatePlan(id: string, body: import("@features/scheduling/types/scheduling.types").SchedulePlanUpsertPayload): Promise<ApiResponse<SchedulePlanDetail>> {
+  async createPlansBulk(body: BulkCreatePayload<SchedulePlanUpsertPayload>): Promise<ApiResponse<BulkCreateResponse<SchedulePlanDetail>>> {
+    const { data } = await apiClient.post<ApiResponse<BulkCreateResponse<SchedulePlanDetail>>>("/scheduling/plans/bulk", body);
+    return data;
+  },
+  async updatePlan(id: string, body: SchedulePlanUpsertPayload): Promise<ApiResponse<SchedulePlanDetail>> {
     const { data } = await apiClient.put<ApiResponse<SchedulePlanDetail>>(`/scheduling/plans/${id}`, body);
     return data;
   },
@@ -62,11 +70,15 @@ export const schedulingApi = {
     const { data } = await apiClient.get<ApiResponse<ScheduleJobDetail>>(`/scheduling/jobs/${id}`);
     return data;
   },
-  async createJob(body: import("@features/scheduling/types/scheduling.types").ScheduleJobUpsertPayload): Promise<ApiResponse<ScheduleJobDetail>> {
+  async createJob(body: ScheduleJobUpsertPayload): Promise<ApiResponse<ScheduleJobDetail>> {
     const { data } = await apiClient.post<ApiResponse<ScheduleJobDetail>>("/scheduling/jobs", body);
     return data;
   },
-  async updateJob(id: string, body: import("@features/scheduling/types/scheduling.types").ScheduleJobUpsertPayload): Promise<ApiResponse<ScheduleJobDetail>> {
+  async createJobsBulk(body: BulkCreatePayload<ScheduleJobUpsertPayload>): Promise<ApiResponse<BulkCreateResponse<ScheduleJobDetail>>> {
+    const { data } = await apiClient.post<ApiResponse<BulkCreateResponse<ScheduleJobDetail>>>("/scheduling/jobs/bulk", body);
+    return data;
+  },
+  async updateJob(id: string, body: ScheduleJobUpsertPayload): Promise<ApiResponse<ScheduleJobDetail>> {
     const { data } = await apiClient.put<ApiResponse<ScheduleJobDetail>>(`/scheduling/jobs/${id}`, body);
     return data;
   },
@@ -130,6 +142,18 @@ export const schedulingApi = {
   },
   async getShift(id: string): Promise<ApiResponse<Shift>> {
     const { data } = await apiClient.get<ApiResponse<Shift>>(`/scheduling/shifts/${id}`);
+    return data;
+  },
+  async createShift(body: ShiftUpsertPayload): Promise<ApiResponse<Shift>> {
+    const { data } = await apiClient.post<ApiResponse<Shift>>("/scheduling/shifts", body);
+    return data;
+  },
+  async createShiftsBulk(body: BulkCreatePayload<ShiftUpsertPayload>): Promise<ApiResponse<BulkCreateResponse<Shift>>> {
+    const { data } = await apiClient.post<ApiResponse<BulkCreateResponse<Shift>>>("/scheduling/shifts/bulk", body);
+    return data;
+  },
+  async updateShift(id: string, body: Omit<ShiftUpsertPayload, "warehouseId" | "workCenterId" | "shiftCode"> & { isActive: boolean }): Promise<ApiResponse<Shift>> {
+    const { data } = await apiClient.put<ApiResponse<Shift>>(`/scheduling/shifts/${id}`, body);
     return data;
   },
   async getShiftsSummary(): Promise<ApiResponse<ShiftMetricsSummary>> {

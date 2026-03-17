@@ -13,8 +13,11 @@ import type {
   RoutingMetricsSummary,
   MachineMetricsSummary,
   ProductionExecutionMetricsSummary,
-  ProductionOrderMetricsSummary
+  ProductionOrderMetricsSummary,
+  RoutingUpsertPayload,
+  MachineUpsertPayload
 } from "@features/production/types/production.types";
+import type { BulkCreatePayload, BulkCreateResponse } from "@shared/types/bulk.types";
 
 export const productionApi = {
   /* ── Production Orders ────────────────────────── */
@@ -35,6 +38,11 @@ export const productionApi = {
 
   async createOrder(body: ProductionOrderUpsertPayload): Promise<ApiResponse<ProductionOrder>> {
     const { data } = await apiClient.post<ApiResponse<ProductionOrder>>("/production/orders", body);
+    return data;
+  },
+
+  async createOrdersBulk(body: BulkCreatePayload<ProductionOrderUpsertPayload>): Promise<ApiResponse<BulkCreateResponse<ProductionOrder>>> {
+    const { data } = await apiClient.post<ApiResponse<BulkCreateResponse<ProductionOrder>>>("/production/orders/bulk", body);
     return data;
   },
 
@@ -95,6 +103,16 @@ export const productionApi = {
     return data;
   },
 
+  async createRouting(body: RoutingUpsertPayload): Promise<ApiResponse<RoutingSummary>> {
+    const { data } = await apiClient.post<ApiResponse<RoutingSummary>>("/production/routings", body);
+    return data;
+  },
+
+  async createRoutingsBulk(body: BulkCreatePayload<RoutingUpsertPayload>): Promise<ApiResponse<BulkCreateResponse<RoutingSummary>>> {
+    const { data } = await apiClient.post<ApiResponse<BulkCreateResponse<RoutingSummary>>>("/production/routings/bulk", body);
+    return data;
+  },
+
   async getRoutingsSummary(): Promise<ApiResponse<RoutingMetricsSummary>> {
     const { data } = await apiClient.get<ApiResponse<RoutingMetricsSummary>>("/production/routings/summary");
     return data;
@@ -103,6 +121,21 @@ export const productionApi = {
   /* ── Machines ─────────────────────────────────── */
   async listMachines(params?: { pageNumber?: number; pageSize?: number }): Promise<ApiResponse<Machine[]>> {
     const { data } = await apiClient.get<ApiResponse<Machine[]>>("/production/machines", { params });
+    return data;
+  },
+
+  async createMachine(body: MachineUpsertPayload): Promise<ApiResponse<Machine>> {
+    const { data } = await apiClient.post<ApiResponse<Machine>>("/production/machines", body);
+    return data;
+  },
+
+  async createMachinesBulk(body: BulkCreatePayload<MachineUpsertPayload>): Promise<ApiResponse<BulkCreateResponse<Machine>>> {
+    const { data } = await apiClient.post<ApiResponse<BulkCreateResponse<Machine>>>("/production/machines/bulk", body);
+    return data;
+  },
+
+  async updateMachine(id: string, body: MachineUpsertPayload): Promise<ApiResponse<Machine>> {
+    const { data } = await apiClient.put<ApiResponse<Machine>>(`/production/machines/${id}`, body);
     return data;
   },
 

@@ -1,60 +1,61 @@
-import { Box, Card, CardContent, Chip, Stack, Typography } from "@mui/material";
-import type { KpiCardData } from "@features/dashboard/types/dashboard.types";
-import { kpiDeltaColor } from "@features/dashboard/utils/dashboard.utils";
+import { alpha, Avatar, Card, CardContent, Chip, Stack, Typography } from "@mui/material";
+import type { DashboardKpiCard } from "@features/dashboard/types/dashboard.types";
+import { renderDashboardIcon } from "@features/dashboard/utils/dashboard.icons";
+import { getKpiTrendChipColor } from "@features/dashboard/utils/dashboard.utils";
 
-type Props = {
-  kpi: KpiCardData;
+type KpiCardProps = {
+  kpi: DashboardKpiCard;
 };
 
-const tones: Record<string, { gradient: string; icon: string; border: string; bg: string }> = {
-  k1: { gradient: "linear-gradient(135deg, #6366f1, #818cf8)", icon: "#6366f1", border: "#e0e7ff", bg: "#eef2ff" },
-  k2: { gradient: "linear-gradient(135deg, #10b981, #34d399)", icon: "#10b981", border: "#d1fae5", bg: "#ecfdf5" },
-  k3: { gradient: "linear-gradient(135deg, #f59e0b, #fbbf24)", icon: "#f59e0b", border: "#fef3c7", bg: "#fffbeb" },
-  k4: { gradient: "linear-gradient(135deg, #8b5cf6, #a78bfa)", icon: "#8b5cf6", border: "#ede9fe", bg: "#f5f3ff" }
-};
-
-export function KpiCard({ kpi }: Props) {
-  const tone = tones[kpi.id] ?? tones.k4;
-
+export function KpiCard({ kpi }: KpiCardProps) {
   return (
-    <Card className="group relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
-      <Box
-        className="absolute inset-x-0 top-0 h-1 opacity-80 transition-opacity group-hover:opacity-100"
-        sx={{ background: tone.gradient }}
-      />
-      <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
+    <Card
+      sx={{
+        height: "100%",
+        borderRadius: 1,
+        border: "1px solid",
+        borderColor: "divider",
+        boxShadow: "0 8px 24px rgba(15,23,42,0.06)",
+        background: `linear-gradient(180deg, ${alpha(kpi.color, 0.08)} 0%, rgba(255,255,255,1) 42%)`,
+      }}
+    >
+      <CardContent sx={{ p: 2.5 }}>
         <Stack spacing={2}>
-          <Stack direction="row" alignItems="flex-start" justifyContent="space-between">
-            <Box
-              className="flex h-10 w-10 items-center justify-center rounded-xl text-sm font-bold"
-              sx={{ backgroundColor: tone.bg, color: tone.icon, border: `1px solid ${tone.border}` }}
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Stack>
+              <Typography variant="body2" color="text.secondary" fontWeight={600}>
+                {kpi.title}
+              </Typography>
+              <Typography variant="h4" fontWeight={800} sx={{ mt: 0.5 }}>
+                {kpi.value}
+              </Typography>
+            </Stack>
+            <Avatar
+              variant="rounded"
+              sx={{
+                width: 52,
+                height: 52,
+                borderRadius: 1,
+                bgcolor: alpha(kpi.color, 0.14),
+                color: kpi.color,
+              }}
             >
-              {kpi.value[0]}
-            </Box>
-            <Chip
-              color={kpiDeltaColor(kpi)}
-              label={kpi.delta}
-              size="small"
-              variant="outlined"
-              sx={{ height: 24, fontSize: 12 }}
-            />
+              {renderDashboardIcon(kpi.iconKey)}
+            </Avatar>
           </Stack>
 
-          <Box>
-            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#64748b", mb: 0.5 }}>
-              {kpi.label}
-            </Typography>
-            <Typography sx={{ fontSize: "1.5rem", fontWeight: 700, color: "#0f172a", letterSpacing: "-0.025em", lineHeight: 1.2 }}>
-              {kpi.value}
-            </Typography>
-          </Box>
-
-          <Box className="h-1.5 w-full overflow-hidden rounded-full" sx={{ backgroundColor: tone.bg }}>
-            <Box
-              className="h-full rounded-full transition-all duration-500"
-              sx={{ width: "68%", background: tone.gradient }}
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Chip
+              icon={renderDashboardIcon("trend", { sx: { fontSize: 16 } })}
+              label={kpi.change}
+              size="small"
+              color={getKpiTrendChipColor(kpi)}
+              variant="outlined"
             />
-          </Box>
+            <Typography variant="caption" color="text.secondary">
+              {kpi.subtext}
+            </Typography>
+          </Stack>
         </Stack>
       </CardContent>
     </Card>

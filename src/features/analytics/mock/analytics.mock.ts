@@ -1,43 +1,178 @@
-import type { AnalyticsDataset } from "@features/analytics/types/analytics.types";
+import type { AnalyticsOverviewData } from "@features/analytics/types/analytics.types";
 
-export const analyticsMock: AnalyticsDataset[] = [
-  {
-    id: "prod-analytics", label: "Production Analytics", category: "production",
-    metrics: [
-      { id: "m1", label: "Throughput", current: 142, previous: 128, unit: "units/day", trend: "up" },
-      { id: "m2", label: "Avg Cycle Time", current: 4.2, previous: 4.8, unit: "days", trend: "down" },
-      { id: "m3", label: "Line Utilization", current: 82, previous: 79, unit: "%", trend: "up" },
-      { id: "m4", label: "Downtime", current: 6.5, previous: 8.2, unit: "hrs/week", trend: "down" }
+export const analyticsOverviewMock: AnalyticsOverviewData = {
+  header: {
+    title: "Operations Analytics",
+    subtitle:
+      "Deeper KPI and trend exploration across inventory, orders, production, quality, and shipment performance.",
+    dateRangeOptions: [
+      { value: "7d", label: "7D" },
+      { value: "30d", label: "30D" },
+      { value: "90d", label: "90D" },
+      { value: "1y", label: "1Y" },
     ],
-    trend: [
-      { date: "2026-03-01", value: 120 }, { date: "2026-03-02", value: 135 }, { date: "2026-03-03", value: 128 },
-      { date: "2026-03-04", value: 142 }, { date: "2026-03-05", value: 138 }, { date: "2026-03-06", value: 150 }, { date: "2026-03-07", value: 142 }
-    ]
+    plantOptions: [
+      { value: "All Plants", label: "All Plants" },
+      { value: "Toronto", label: "Toronto" },
+      { value: "Calgary", label: "Calgary" },
+      { value: "Vancouver", label: "Vancouver" },
+      { value: "Montreal", label: "Montreal" },
+    ],
+    exportLabel: "Export",
   },
-  {
-    id: "fulfill-analytics", label: "Fulfillment Analytics", category: "fulfillment",
-    metrics: [
-      { id: "m5", label: "On-Time Delivery", current: 94, previous: 91, unit: "%", trend: "up" },
-      { id: "m6", label: "Avg Lead Time", current: 5.1, previous: 5.8, unit: "days", trend: "down" },
-      { id: "m7", label: "Order Fill Rate", current: 97, previous: 95, unit: "%", trend: "up" },
-      { id: "m8", label: "Return Rate", current: 1.2, previous: 1.5, unit: "%", trend: "down" }
-    ],
-    trend: [
-      { date: "2026-03-01", value: 91 }, { date: "2026-03-02", value: 93 }, { date: "2026-03-03", value: 90 },
-      { date: "2026-03-04", value: 94 }, { date: "2026-03-05", value: 92 }, { date: "2026-03-06", value: 95 }, { date: "2026-03-07", value: 94 }
-    ]
+  kpis: [
+    {
+      id: "revenue",
+      title: "Revenue",
+      value: "$186,900",
+      change: "+8.6%",
+      helper: "vs prior period",
+      positive: true,
+      iconKey: "currency",
+    },
+    {
+      id: "oee",
+      title: "Overall OEE",
+      value: "91.8%",
+      change: "+2.3%",
+      helper: "equipment effectiveness",
+      positive: true,
+      iconKey: "production",
+    },
+    {
+      id: "fulfillment",
+      title: "Fulfillment Rate",
+      value: "94.2%",
+      change: "+1.8%",
+      helper: "on-time completion",
+      positive: true,
+      iconKey: "task",
+    },
+    {
+      id: "defectRate",
+      title: "Defect Rate",
+      value: "1.9%",
+      change: "-0.7%",
+      helper: "quality improvement",
+      positive: true,
+      iconKey: "check",
+    },
+  ],
+  operationalTrend: {
+    title: "Operational Trend",
+    subtitle: "Orders, production, shipments, and OEE trend in one view",
+    chart: {
+      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
+      series: [
+        { label: "Orders", data: [420, 460, 510, 495, 550, 590, 610, 640] },
+        { label: "Production", data: [390, 415, 470, 458, 502, 544, 561, 592] },
+        { label: "Shipments", data: [365, 388, 442, 436, 481, 521, 538, 566] },
+        { label: "OEE %", data: [87.2, 88.1, 89.4, 88.8, 90.3, 91.2, 91.5, 91.8] },
+      ],
+    },
   },
-  {
-    id: "inv-analytics", label: "Inventory Analytics", category: "inventory",
-    metrics: [
-      { id: "m9", label: "Stock Turnover", current: 6.2, previous: 5.9, unit: "x", trend: "up" },
-      { id: "m10", label: "Carrying Cost", current: 42000, previous: 45000, unit: "$", trend: "down" },
-      { id: "m11", label: "Stockout Events", current: 2, previous: 5, unit: "events", trend: "down" },
-      { id: "m12", label: "Days on Hand", current: 18, previous: 22, unit: "days", trend: "down" }
+  fulfillmentMix: {
+    title: "Fulfillment Mix",
+    subtitle: "Completion status distribution",
+    data: [
+      { id: 0, value: 78, label: "On Time" },
+      { id: 1, value: 14, label: "Delayed" },
+      { id: 2, value: 8, label: "Backordered" },
     ],
-    trend: [
-      { date: "2026-03-01", value: 5.8 }, { date: "2026-03-02", value: 5.9 }, { date: "2026-03-03", value: 6.0 },
-      { date: "2026-03-04", value: 6.1 }, { date: "2026-03-05", value: 5.9 }, { date: "2026-03-06", value: 6.3 }, { date: "2026-03-07", value: 6.2 }
-    ]
-  }
-];
+    colors: ["#16a34a", "#f59e0b", "#dc2626"],
+  },
+  throughput: {
+    title: "Throughput vs Target",
+    subtitle: "Line-level productivity against benchmark",
+    chart: {
+      labels: ["Line A", "Line B", "Line C", "Line D", "Line E"],
+      series: [
+        { label: "Actual", data: [94, 88, 102, 97, 91] },
+        { label: "Target", data: [100, 100, 100, 100, 100] },
+      ],
+    },
+  },
+  shipmentPerformance: {
+    title: "Shipment Performance by Region",
+    subtitle: "Delivered vs delayed shipments",
+    chart: {
+      labels: ["Ontario", "Alberta", "BC", "Quebec"],
+      series: [
+        { label: "Delivered", data: [182, 149, 121, 136] },
+        { label: "Delayed", data: [18, 14, 12, 16] },
+      ],
+    },
+  },
+  qualityTrend: {
+    title: "Quality Trend",
+    subtitle: "Pass rate and defect trend",
+    chart: {
+      labels: ["W1", "W2", "W3", "W4", "W5", "W6"],
+      series: [
+        { label: "Pass Rate", data: [96.1, 96.8, 97.3, 96.9, 97.8, 98.1] },
+        { label: "Defects", data: [21, 18, 15, 17, 12, 10] },
+      ],
+    },
+  },
+  operationalHealth: {
+    title: "Operational Health",
+    subtitle: "Supporting indicators across operations",
+    metrics: [
+      { id: "turnover", label: "Inventory Turnover", value: "7.4x", progress: 74, iconKey: "inventory" },
+      { id: "leadTime", label: "Average Lead Time", value: "4.6 days", progress: 63, iconKey: "trend" },
+      { id: "downtime", label: "Downtime", value: "3.4%", progress: 34, iconKey: "production" },
+      { id: "throughput", label: "Network Throughput", value: "5,620 units", progress: 82, iconKey: "shipments" },
+    ],
+  },
+  alerts: {
+    title: "Alerts & Exceptions",
+    subtitle: "Signals that need operational attention",
+    items: [
+      {
+        id: "line-b",
+        title: "Line B throughput below target",
+        description: "Actual output is 12% below target over the selected range.",
+        severity: "High",
+      },
+      {
+        id: "packaging",
+        title: "Packaging stock pressure",
+        description: "Inventory coverage is trending down and may affect shipment readiness.",
+        severity: "Medium",
+      },
+      {
+        id: "ontario-sla",
+        title: "Ontario delivery SLA improved",
+        description: "On-time shipment recovery seen after route balancing.",
+        severity: "Low",
+      },
+    ],
+  },
+  insightSummary: {
+    title: "Insight Summary",
+    subtitle: "Quick interpretation of the current operational direction",
+    cards: [
+      {
+        id: "demand-alignment",
+        iconKey: "trend",
+        title: "Demand and execution are moving together",
+        body:
+          "Orders, production, and shipments are all trending upward with no major divergence yet, which suggests stable operational scaling.",
+      },
+      {
+        id: "line-b-bottleneck",
+        iconKey: "production",
+        title: "Line B is the clearest bottleneck",
+        body:
+          "Compared with the target benchmark, Line B remains the most underperforming area and should be prioritized for investigation.",
+      },
+      {
+        id: "quality-improving",
+        iconKey: "check",
+        title: "Quality is improving while volume grows",
+        body:
+          "Pass rate is increasing and defects are dropping, indicating process maturity rather than growth-driven quality erosion.",
+      },
+    ],
+  },
+};

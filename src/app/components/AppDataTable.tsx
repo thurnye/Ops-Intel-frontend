@@ -36,6 +36,8 @@ type AppDataTableColumnMeta = {
   width?: string | number;
 };
 
+type ResponsiveDimension = string | number | Partial<Record<"xs" | "sm" | "md" | "lg" | "xl", string | number>>;
+
 type AppDataTableProps<TData> = {
   columns: AppDataTableColumnDef<TData>[];
   data: TData[];
@@ -51,6 +53,9 @@ type AppDataTableProps<TData> = {
   totalRows?: number;
   onPageChange?: (pageIndex: number) => void;
   onPageSizeChange?: (pageSize: number) => void;
+  tableMinWidth?: ResponsiveDimension;
+  tableMaxWidth?: ResponsiveDimension;
+  useParentHorizontalOverflow?: boolean;
 };
 
 export function AppDataTable<TData>({
@@ -67,7 +72,10 @@ export function AppDataTable<TData>({
   pageSize,
   totalRows,
   onPageChange,
-  onPageSizeChange
+  onPageSizeChange,
+  tableMinWidth,
+  tableMaxWidth,
+  useParentHorizontalOverflow = false
 }: AppDataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -120,9 +128,11 @@ export function AppDataTable<TData>({
   return (
     <Box
       sx={{
-        borderRadius: 4,
+        width: "100%",
+        minWidth: 0,
+        maxWidth: tableMaxWidth ?? "100%",
+        borderRadius: 1,
         border: "1px solid #e2e8f0",
-        overflow: "hidden",
         background:
           "linear-gradient(180deg, rgba(248,250,252,0.92) 0%, rgba(255,255,255,1) 18%)"
       }}
@@ -175,8 +185,23 @@ export function AppDataTable<TData>({
         </Stack>
       </Stack>
 
-      <Box sx={{ overflowX: "auto", maxHeight: maxBodyHeight }}>
-        <Box component="table" sx={{ width: "100%", borderCollapse: "separate", borderSpacing: 0 }}>
+      <Box
+        sx={{
+          width: "100%",
+          overflowX: useParentHorizontalOverflow ? "visible" : "auto",
+          maxHeight: maxBodyHeight,
+          maxWidth: "100%"
+        }}
+      >
+        <Box
+          component="table"
+          sx={{
+            width: tableMinWidth ? "max-content" : "100%",
+            minWidth: tableMinWidth ?? 750,
+            borderCollapse: "separate",
+            borderSpacing: 0
+          }}
+        >
           <Box component="thead" sx={{ position: "sticky", top: 0, zIndex: 1 }}>
             {table.getHeaderGroups().map((headerGroup) => (
               <Box component="tr" key={headerGroup.id} sx={{ backgroundColor: "#f8fafc" }}>
@@ -201,6 +226,8 @@ export function AppDataTable<TData>({
                         textTransform: "uppercase",
                         color: "#64748b",
                         whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
                         width: columnMeta?.width
                       }}
                     >
@@ -214,11 +241,21 @@ export function AppDataTable<TData>({
                           alignItems="center"
                           sx={{
                             cursor: canSort ? "pointer" : "default",
-                            userSelect: "none"
+                            userSelect: "none",
+                            minWidth: 0,
+                            maxWidth: "100%"
                           }}
                           onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
                         >
-                          <Box component="span">
+                          <Box
+                            component="span"
+                            sx={{
+                              minWidth: 0,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap"
+                            }}
+                          >
                             {flexRender(header.column.columnDef.header, header.getContext())}
                           </Box>
                           {canSort ? (

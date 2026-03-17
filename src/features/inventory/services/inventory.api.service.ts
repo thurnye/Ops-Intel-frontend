@@ -13,6 +13,9 @@ import type {
   ProductMetricsSummary
 } from "@features/inventory/types/inventory.types";
 import type { BrandMetricsSummary, WarehouseMetricsSummary, SupplierMetricsSummary } from "@features/inventory/types/inventory.types";
+import type { ProductBulkSavePayload, ProductBulkSaveResponse } from "@features/inventory/types/inventory.types";
+import type { BrandUpsertPayload, WarehouseUpsertPayload, SupplierUpsertPayload } from "@features/inventory/types/inventory.types";
+import type { BulkCreatePayload, BulkCreateResponse } from "@shared/types/bulk.types";
 
 export const inventoryApi = {
   /* ── Products ─────────────────────────────────── */
@@ -33,6 +36,11 @@ export const inventoryApi = {
 
   async createProduct(body: import("@features/inventory/types/inventory.types").ProductUpsertPayload): Promise<ApiResponse<Product>> {
     const { data } = await apiClient.post<ApiResponse<Product>>("/inventory/products", body);
+    return data;
+  },
+
+  async createProductsBulk(body: ProductBulkSavePayload): Promise<ApiResponse<ProductBulkSaveResponse>> {
+    const { data } = await apiClient.post<ApiResponse<ProductBulkSaveResponse>>("/inventory/products/bulk", body);
     return data;
   },
 
@@ -69,6 +77,21 @@ export const inventoryApi = {
     return data;
   },
 
+  async createBrand(body: BrandUpsertPayload): Promise<ApiResponse<Brand>> {
+    const { data } = await apiClient.post<ApiResponse<Brand>>("/inventory/brands", body);
+    return data;
+  },
+
+  async createBrandsBulk(body: BulkCreatePayload<BrandUpsertPayload>): Promise<ApiResponse<BulkCreateResponse<Brand>>> {
+    const { data } = await apiClient.post<ApiResponse<BulkCreateResponse<Brand>>>("/inventory/brands/bulk", body);
+    return data;
+  },
+
+  async updateBrand(id: string, body: BrandUpsertPayload): Promise<ApiResponse<Brand>> {
+    const { data } = await apiClient.put<ApiResponse<Brand>>(`/inventory/brands/${id}`, { id, ...body });
+    return data;
+  },
+
   async getBrandsSummary(): Promise<ApiResponse<BrandMetricsSummary>> {
     const { data } = await apiClient.get<ApiResponse<BrandMetricsSummary>>("/inventory/brands/summary");
     return data;
@@ -84,6 +107,21 @@ export const inventoryApi = {
     return data;
   },
 
+  async createWarehouse(body: WarehouseUpsertPayload): Promise<ApiResponse<Warehouse>> {
+    const { data } = await apiClient.post<ApiResponse<Warehouse>>("/inventory/warehouses", body);
+    return data;
+  },
+
+  async createWarehousesBulk(body: BulkCreatePayload<WarehouseUpsertPayload>): Promise<ApiResponse<BulkCreateResponse<Warehouse>>> {
+    const { data } = await apiClient.post<ApiResponse<BulkCreateResponse<Warehouse>>>("/inventory/warehouses/bulk", body);
+    return data;
+  },
+
+  async updateWarehouse(id: string, body: WarehouseUpsertPayload): Promise<ApiResponse<Warehouse>> {
+    const { data } = await apiClient.put<ApiResponse<Warehouse>>(`/inventory/warehouses/${id}`, { id, ...body });
+    return data;
+  },
+
   async getWarehousesSummary(): Promise<ApiResponse<WarehouseMetricsSummary>> {
     const { data } = await apiClient.get<ApiResponse<WarehouseMetricsSummary>>("/inventory/warehouses/summary");
     return data;
@@ -91,6 +129,21 @@ export const inventoryApi = {
 
   async listSuppliers(): Promise<ApiResponse<Supplier[]>> {
     const { data } = await apiClient.get<ApiResponse<Supplier[]>>("/inventory/suppliers");
+    return data;
+  },
+
+  async createSupplier(body: SupplierUpsertPayload): Promise<ApiResponse<Supplier>> {
+    const { data } = await apiClient.post<ApiResponse<Supplier>>("/inventory/suppliers", body);
+    return data;
+  },
+
+  async createSuppliersBulk(body: BulkCreatePayload<SupplierUpsertPayload>): Promise<ApiResponse<BulkCreateResponse<Supplier>>> {
+    const { data } = await apiClient.post<ApiResponse<BulkCreateResponse<Supplier>>>("/inventory/suppliers/bulk", body);
+    return data;
+  },
+
+  async updateSupplier(id: string, body: SupplierUpsertPayload): Promise<ApiResponse<Supplier>> {
+    const { data } = await apiClient.put<ApiResponse<Supplier>>(`/inventory/suppliers/${id}`, { id, ...body });
     return data;
   },
 

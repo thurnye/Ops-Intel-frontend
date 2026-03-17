@@ -149,6 +149,20 @@ export type ShipmentAddress = {
   country: string;
 };
 
+export type ShipmentAddressUpsertPayload = {
+  addressType: string;
+  contactName: string;
+  companyName?: string;
+  phone?: string;
+  email?: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  stateOrProvince: string;
+  postalCode: string;
+  country: string;
+};
+
 export type CarrierService = {
   id: string;
   carrierId: string;
@@ -169,6 +183,16 @@ export type Carrier = {
   website?: string;
   isActive: boolean;
   services: CarrierService[];
+};
+
+export type CarrierUpsertPayload = {
+  carrierCode: string;
+  name: string;
+  contactName?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  isActive: boolean;
 };
 
 export type CarrierMetricsSummary = {
