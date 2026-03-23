@@ -240,3 +240,5 @@ export type DashboardOverviewData = {
     lowStockItems: DashboardStockRow[];
   };
 };
+
+export type DashboardOverviewApiResponse = DashboardOverviewData;
